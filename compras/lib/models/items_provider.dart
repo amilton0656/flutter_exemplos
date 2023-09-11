@@ -30,7 +30,7 @@ class ItemsProvider with ChangeNotifier {
           descricao: itemData['descricao'] as String,
           quantidade: itemData['quantidade'] as double,
           usuario: itemData['usuario'],
-          isBought: false,
+          isBought: itemData['isBought'],
         ),
       );
     });
@@ -141,7 +141,7 @@ class ItemsProvider with ChangeNotifier {
 
       items[index].isBought = !items[index].isBought;
       items[index] = item;
-      // notifyListeners();
+      notifyListeners();
     }
 
     if (indexUsuario >= 0) {

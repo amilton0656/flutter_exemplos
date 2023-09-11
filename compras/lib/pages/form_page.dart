@@ -124,15 +124,15 @@ class _FormPageState extends State<FormPage> {
                         ? const CircularProgressIndicator()
                         : ElevatedButton(
                             onPressed: () {
-                              onSubmitForm();
+                              Navigator.of(context).pop();
                             },
-                            child: const Text('Salvar'),
+                            child: const Text('Sair'),
                           ),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        onSubmitForm();
                       },
-                      child: const Text('Sair'),
+                      child: const Text('Salvar'),
                     ),
                   ],
                 ),

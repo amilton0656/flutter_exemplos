@@ -37,3 +37,25 @@ class MyApp extends StatelessWidget {
 }
 
 //flutter build apk --split-per-abi
+
+/*
+
+android\app\src\main\AndroidManifest.xml
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+    package="com.example.pedido">
+    <!-- io.flutter.app.FlutterApplication is an android.app.Application that
+         calls FlutterMain.startInitialization(this); in its onCreate method.
+         In most cases you can leave this as-is, but you if you want to provide
+         additional functionality it is fine to subclass or reimplement
+         FlutterApplication and put your custom class here. -->
+         <uses-permission android:name="android.permission.INTERNET"/>
+
+         
+    <application
+
+
+
+*/
