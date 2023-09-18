@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pessoas/data/app_data.dart' as app_data;
-import 'package:pessoas/screens/form_screen.dart';
+import 'package:pessoas/modulos/usuario/form_screen.dart';
 import 'package:pessoas/utils/paleta_cores.dart';
 
 class HomeScreen extends StatefulWidget {

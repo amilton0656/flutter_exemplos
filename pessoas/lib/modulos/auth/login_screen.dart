@@ -1,7 +1,9 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:bcrypt/bcrypt.dart';
+// import 'package:bcrypt/bcrypt.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:pessoas/screens/home_screen.dart';
+import 'package:http/http.dart' as http;
+// import 'package:pessoas/modulos/usuario/home_screen.dart';
 
 import 'package:pessoas/utils/paleta_cores.dart';
 import 'package:pessoas/widgets/custom_text_field.dart';
@@ -25,19 +27,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
   _submitForm() {
     print('SUBMIT');
+    pegaGet();
     final validado = _formKey.currentState!.validate();
     if (validado) {
       setState(() {
         login = Login(
           nome: _controllerEmail.text,
-          senha: BCrypt.hashpw(_controllerSenha.text, BCrypt.gensalt()),
+          senha: _controllerSenha.text,
         );
       });
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (ctx) => const HomeScreen()),
-      );
+      // Navigator.of(context).pushReplacement(
+      //   MaterialPageRoute(builder: (ctx) => const HomeScreen()),
+      // );
     }
+  }
+
+  pegaGet() async {
+    print('PEGA');
+    // final usu = jsonEncode({"nome": "abcde", "senha": "22222"});
+    final url = Uri.parse('http://www.amilton.com.br/api/usuario/login');
+    // final response = await http.get(url);
+    final response =
+        await http.post(url, body: {"nome": "abcde", "senha": "22222"});
+    print(response.body);
   }
 
   @override
