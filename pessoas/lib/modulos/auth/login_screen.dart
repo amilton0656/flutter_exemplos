@@ -1,10 +1,8 @@
-// import 'package:bcrypt/bcrypt.dart';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-// import 'package:pessoas/modulos/usuario/home_screen.dart';
+import 'package:provider/provider.dart';
 
+import 'package:pessoas/modulos/auth/auth_provider.dart';
+import 'package:pessoas/modulos/usuario/usuario_lista_screen.dart';
 import 'package:pessoas/utils/paleta_cores.dart';
 import 'package:pessoas/widgets/custom_text_field.dart';
 
@@ -20,37 +18,61 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final _controllerEmail = TextEditingController();
   final _controllerSenha = TextEditingController();
-  Login login = Login(
-    nome: '',
-    senha: '',
-  );
 
-  _submitForm() {
-    print('SUBMIT');
-    pegaGet();
+  bool isLoading = false;
+
+  _submitForm(BuildContext context) async {
+    () => FocusManager.instance.primaryFocus?.unfocus();
     final validado = _formKey.currentState!.validate();
+
     if (validado) {
       setState(() {
-        login = Login(
-          nome: _controllerEmail.text,
-          senha: _controllerSenha.text,
-        );
+        isLoading = true;
       });
 
-      // Navigator.of(context).pushReplacement(
-      //   MaterialPageRoute(builder: (ctx) => const HomeScreen()),
-      // );
+      final statusCode = await Provider.of<AuthProvider>(context, listen: false)
+          .checkAuth(_controllerEmail.text, _controllerSenha.text);
+
+      setState(() {
+        isLoading = false;
+      });
+
+      if (statusCode >= 200 && statusCode < 300) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (ctx) => const UsuarioListaScreen()),
+        );
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        if (statusCode == 408) {
+          _openDialog('Sem conexão!', 'Verifique seu sinal de internet.');
+        } else {
+          _openDialog();
+        }
+      }
     }
   }
 
-  pegaGet() async {
-    print('PEGA');
-    // final usu = jsonEncode({"nome": "abcde", "senha": "22222"});
-    final url = Uri.parse('http://www.amilton.com.br/api/usuario/login');
-    // final response = await http.get(url);
-    final response =
-        await http.post(url, body: {"nome": "abcde", "senha": "22222"});
-    print(response.body);
+  _openDialog([String? aaa, String? bbb]) {
+    String titulo = aaa ?? 'Acesso negado!';
+    String conteudo = bbb ?? 'Email e/ou senha inválidos';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(titulo),
+        content: Text(conteudo),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -86,6 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              //Email
                               CustomTextField(
                                 controller: _controllerEmail,
                                 icon: Icons.email,
@@ -100,7 +123,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   return null;
                                 },
                               ),
+
+                              //Senha
                               CustomTextField(
+                                onFieldSubmitted: (_) => _submitForm(context),
                                 controller: _controllerSenha,
                                 icon: Icons.lock,
                                 label: 'Senha',
@@ -115,13 +141,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                   return null;
                                 },
                               ),
+
+                              //Botao entrar
                               SizedBox(
                                 height: 50,
                                 child: ElevatedButton(
-                                  onPressed: _submitForm,
-                                  child: const Text(
-                                    'Entrar',
-                                    style: TextStyle(fontSize: 16),
+                                  onPressed: () => _submitForm(context),
+                                  child: Text(
+                                    isLoading ? 'Verificando...' : 'Entrar',
+                                    style: const TextStyle(fontSize: 16),
                                   ),
                                 ),
                               ),

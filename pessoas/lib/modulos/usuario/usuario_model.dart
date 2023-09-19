@@ -10,4 +10,8 @@ class Usuario {
     required this.email,
     required this.senha,
   });
+
+  set id(int id) {
+    id = id;
+  }
 }
