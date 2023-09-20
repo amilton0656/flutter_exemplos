@@ -9,7 +9,7 @@ import 'package:pessoas/utils/constants.dart';
 class AuthProvider with ChangeNotifier {
   final _url = Uri.parse('${Constantes.urlBase}/login');
 
-  AuthUsuario authUsuario = AuthUsuario(
+  static AuthUsuario authUsuario = AuthUsuario(
     id: 0,
     nome: '',
     auth: false,
@@ -18,8 +18,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<int> checkAuth(String email, String senha) async {
     try {
-      final response = await http
-          .post(_url, body: {"email": email, "senha": senha}).timeout(
+      final response =
+          await http.post(_url, body: {"email": email, "senha": senha}).timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           return http.Response('Error', 408);
@@ -48,6 +48,7 @@ class AuthProvider with ChangeNotifier {
         }
       }
     } catch (err) {
+          print('dentro do catch...$err');
       return 0;
     }
   }

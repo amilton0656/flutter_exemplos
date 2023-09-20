@@ -6,7 +6,6 @@ import 'package:pessoas/utils/paleta_cores.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/models.dart';
-import '../auth/auth_provider.dart';
 import 'usuario_provider.dart';
 
 class UsuarioListaScreen extends StatefulWidget {
@@ -17,75 +16,68 @@ class UsuarioListaScreen extends StatefulWidget {
 }
 
 class _UsuarioListaScreenState extends State<UsuarioListaScreen> {
-  String token = '';
-  List<Usuario> usuarios = [];
+  List<UsuarioModel> usuarios = [];
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   scheduleMicrotask(
-  //     () {
-  //       print('dentro do schedule');
-  //       final xxx = Provider.of<AuthProvider>(context).authUsuario;
-  //       print(xxx.token);
-  //     },
-  //   );
-  // }
+  @override
+  void initState() {
+    super.initState();
 
-  // @override
-  // void initState() {
-  //   super.initState();
+    scheduleMicrotask(
+      () {
+        Provider.of<UsuarioProvider>(context, listen: false)
+            .loadUsuarios()
+            .then((value) {
+          setState(() {
+            usuarios =
+                Provider.of<UsuarioProvider>(context, listen: false).usuarios;
+          });
+        });
+      },
+    );
+  }
 
-  //   scheduleMicrotask(() {
-  //     final String xxx = Provider.of<AuthProvider>(context).authUsuario.token;
-  //   });
-  // }
-
-  // Future(() => token = Provider.of<AuthProvider>(context).authUsuario.token);
-
-  // scheduleMicrotask(() {
-  //   setState(() {
-  //     print('token 2 - $token');
-  //     final xxx = Provider.of<UsuarioProvider>(context).loadUsuarios(token);
-  //     print('token 3 - $token');
-  //   });
-  // });
-
-  // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-  //   const String token =
-  //       ''; //Provider.of<AuthProvider>(context).authUsuario.token;
-  // });
-
-  // print(token);
+  Future<void> refreshItems(BuildContext context) async {
+    setState(() {
+      usuarios = Provider.of<UsuarioProvider>(context, listen: false).usuarios;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    // final usuariosx =
-    // Provider.of<UsuarioProvider>(context).loadUsuarios('token');
-    // final usuarios = Provider.of<UsuarioProvider>(context).usuarios;
-
-    // final usuarios = [];
-
-    // Provider.of<UsuarioProvider>(context).usuarios;
-    final token = Provider.of<AuthProvider>(context).authUsuario.token;
-    print('>>>> print do token >>> $token');
-    final xxx = Provider.of<UsuarioProvider>(context).loadUsuarios(token);
-
-    setState(() {
-      usuarios = Provider.of<UsuarioProvider>(context).usuarios;
-    });
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Usuários'),
       ),
-      body: ListView.builder(
-          itemCount: usuarios.length,
-          itemBuilder: (ctx, index) {
-            return ListTile(
-              title: Text(usuarios[index].nome),
-            );
-          }),
+      body: Consumer<UsuarioProvider>(
+          builder: (context, value, child) => RefreshIndicator(
+                onRefresh: () => refreshItems(context),
+                child: ListView.builder(
+                    itemCount: usuarios.length,
+                    itemBuilder: (ctx, index) {
+                      return GestureDetector(
+                        onLongPress: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (ctx) =>
+                                  UsuarioFormScreen(usuario: usuarios[index]),
+                            ),
+                          );
+                        },
+                        child: ListTile(
+                          leading: Text(usuarios[index].id.toString()),
+                          title: Text(usuarios[index].nome),
+                          subtitle: Text(usuarios[index].email),
+                          trailing: IconButton(
+                            onPressed: () {
+                              Provider.of<UsuarioProvider>(context, listen: false)
+                                  .removeItem(usuarios[index].id);
+                            },
+                            icon: Icon(Icons.delete),
+                          ),
+                        ),
+                      );
+                    }),
+              )),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => const UsuarioFormScreen(),
