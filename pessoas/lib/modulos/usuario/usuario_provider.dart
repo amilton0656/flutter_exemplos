@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
-
-import 'package:pessoas/data/app_data.dart' as app_data;
-import 'package:pessoas/modulos/auth/auth_provider.dart';
-import 'package:provider/provider.dart';
 
 import '../../utils/constants.dart';
 import 'usuario_model.dart';
@@ -18,11 +13,11 @@ class UsuarioProvider with ChangeNotifier {
 
   Future<List<Usuario>> loadUsuarios(String token) async {
     usuarios = [];
+    print('11111');
 
-    final response = await http.post(
+    final response = await http.get(
       _url,
       headers: <String, String>{'Authorization': token},
-
     );
 
     print('>>>  status code ${response.statusCode}');
