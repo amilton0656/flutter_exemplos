@@ -38,7 +38,6 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       if (statusCode >= 200 && statusCode < 300) {
-
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (ctx) => const UsuarioListaScreen()),
         );
@@ -88,10 +87,11 @@ class _LoginScreenState extends State<LoginScreen> {
         body: SafeArea(
             child: Container(
           decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [
-            Colors.blue.shade300,
-            PaletaCores.corNavy,
-          ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
+            gradient: LinearGradient(colors: [
+              Colors.blue.shade300,
+              PaletaCores.corNavy,
+            ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+          ),
           child: Center(
             child: SingleChildScrollView(
               reverse: true,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pessoas/modulos/auth/auth_provider.dart';
 import 'package:pessoas/modulos/auth/login_screen.dart';
 import 'package:pessoas/modulos/usuario/usuario_provider.dart';
+import 'package:pessoas/teste.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         debugShowCheckedModeBanner: false,
-        home: const LoginScreen(),
+        home: LoginScreen(),
       ),
     );
   }

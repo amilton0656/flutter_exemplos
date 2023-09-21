@@ -100,7 +100,7 @@ class UsuarioProvider with ChangeNotifier {
     print('envio : $envio - $index');
 
     if (index >= 0) {
-      final response = await http.put(
+      final response = await http.patch(
         _url,
         headers: <String, String>{'Authorization': token},
         body: envio,
