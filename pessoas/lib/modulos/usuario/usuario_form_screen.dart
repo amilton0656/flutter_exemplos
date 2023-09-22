@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pessoas/models/models.dart';
@@ -28,21 +27,16 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
   Uint8List? bytesImage;
 
   pegaImagem() async {
-    final String image = await open.openImage();
-
-    // Image.memory(bytesImage, width: 200, height: 200);
-    setState(() {
-      base64String = image;
-      bytesImage = const Base64Decoder().convert(base64String!);
-      _formData['imagem'] = base64String as String;
-    });
-    print(base64String);
+    bytesImage = await open.openImage();
+    if (bytesImage != null) {
+      setState(() {
+        _formData['imagem'] = base64Encode(bytesImage!);
+      });
+    }
   }
 
   onSubmitForm() {
     _formKey.currentState?.save();
-
-    print('_formData  $_formData');
 
     setState(() => _isLoading = true);
 
@@ -71,6 +65,23 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
     });
   }
 
+  Widget mostraImagemPerfil(Uint8List? bytesImage) {
+    if (bytesImage != null && bytesImage.isNotEmpty) {
+      return ClipOval(
+        child: Image.memory(bytesImage, width: 120, height: 120),
+      );
+    } else {
+      return ClipOval(
+        child: Image.asset(
+          'assets/images/perfil.png',
+          height: 120,
+          width: 120,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -88,7 +99,8 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
         _formData['imagem'] = usuario.imagem;
 
         base64String = usuario.imagem;
-        bytesImage = const Base64Decoder().convert(base64String!);
+
+        bytesImage = base64Decode(base64String!);
       } else {}
     }
   }
@@ -105,8 +117,8 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [
-                Colors.blue.shade300,
-                PaletaCores.corNavy,
+                largura > 900 ? Colors.blue.shade300 : Colors.white,
+                largura > 900 ? PaletaCores.corNavy : Colors.white,
               ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
             ),
           ),
@@ -121,25 +133,26 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                 margin: EdgeInsets.only(top: largura > 500 ? 20 : 0),
                 width: largura > 800 ? 800 : largura,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      child: bytesImage != null
-                          ? ClipOval(
-                              child: Image.memory(bytesImage!,
-                                  width: 120, height: 120),
-                            )
-                          : ClipOval(
-                              child: Image.asset(
-                                'assets/images/perfil.png',
-                                height: 120,
-                                width: 120,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          mostraImagemPerfil(bytesImage),
+                          TextButton(
+                            onPressed: () {
+                              pegaImagem();
+                            },
+                            child: const Text('Atualizsar Imagem'),
+                          ),
+                        ],
+                      ),
                     ),
                     Form(
                       key: _formKey,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           //Nome
                           CustomTextField(
@@ -198,12 +211,7 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                               },
                               //  Navigator.of(context).pop(),
                               child: const Text('Salvar')),
-                          ElevatedButton(
-                              onPressed: () {
-                                pegaImagem();
-                              },
-                              //  Navigator.of(context).pop(),
-                              child: const Text('get image')),
+                          
                         ],
                       ),
                     ),

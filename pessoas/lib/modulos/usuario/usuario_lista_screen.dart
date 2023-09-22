@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pessoas/modulos/usuario/usuario_form_screen.dart';
 import 'package:pessoas/utils/paleta_cores.dart';
 import 'package:provider/provider.dart';
@@ -36,6 +38,29 @@ class _UsuarioListaScreenState extends State<UsuarioListaScreen> {
     );
   }
 
+  Widget getImage(imagem) {
+    String? base64String = imagem;
+    if (imagem != null && imagem != '') {
+      Uint8List bytesImage = base64Decode(base64String!);
+      return ClipOval(
+        child: Image.memory(
+          bytesImage,
+          width: 40,
+          height: 40,
+        ),
+      );
+    } else {
+      return ClipOval(
+        child: Image.asset(
+          'assets/images/perfil.png',
+          height: 40,
+          width: 40,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+  }
+
   Future<void> refreshItems(BuildContext context) async {
     setState(() {
       usuarios = Provider.of<UsuarioProvider>(context, listen: false).usuarios;
@@ -56,11 +81,11 @@ class _UsuarioListaScreenState extends State<UsuarioListaScreen> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  Colors.blue.shade300,
-                  PaletaCores.corNavy,
-                ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-              ),
+                  gradient: LinearGradient(colors: [
+                    Colors.blue.shade300,
+                    PaletaCores.corNavy,
+                  ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+                ),
               ),
               Center(
                 child: Container(
@@ -91,17 +116,13 @@ class _UsuarioListaScreenState extends State<UsuarioListaScreen> {
                                         .removeItem(usuarios[index].id);
                                   },
                                   child: ListTile(
-                                    leading: largura > 900
-                                        ? Text(usuarios[index].id.toString())
-                                        : null,
+                                    leading: getImage(usuarios[index].imagem),
                                     title: Text(usuarios[index].nome),
                                     subtitle: Text(usuarios[index].email),
                                   ),
                                 )
                               : ListTile(
-                                  leading: largura > 900
-                                      ? Text(usuarios[index].id.toString())
-                                      : null,
+                                  leading: getImage(usuarios[index].imagem),
                                   title: Text(usuarios[index].nome),
                                   subtitle: Text(usuarios[index].email),
                                   trailing: IconButton(
@@ -117,12 +138,12 @@ class _UsuarioListaScreenState extends State<UsuarioListaScreen> {
                       }),
                 ),
               ),
-              
             ],
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         onPressed: () => Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => const UsuarioFormScreen(),
         )),

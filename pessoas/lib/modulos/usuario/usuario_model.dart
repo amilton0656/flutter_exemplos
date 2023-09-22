@@ -1,9 +1,10 @@
+
 class UsuarioModel {
   final int id;
   final String nome;
   final String email;
   final String senha;
-  final dynamic imagem;
+  final String imagem;
 
   UsuarioModel({
     required this.id,

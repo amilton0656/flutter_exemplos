@@ -30,13 +30,14 @@ class UsuarioProvider with ChangeNotifier {
     final data = jsonDecode(response.body);
 
     data.forEach((itemData) {
+
       usuarios.add(
         UsuarioModel(
           id: itemData['id'] ?? 0,
           nome: itemData['nome'] ?? '',
           email: itemData['email'] ?? '',
           senha: itemData['senha'] ?? '',
-          imagem: itemData['imagem'] ?? '',
+          imagem: itemData['imagem'],
         ),
       );
     });
@@ -138,3 +139,22 @@ class UsuarioProvider with ChangeNotifier {
     notifyListeners();
   }
 }
+
+/*
+no banco mysql o campo imagem é varchar mediumtext
+
+
+pegaImagem() async {
+    bytesImage = await open.openImage();  --> retorna -> Future<Uint8List?>
+    if (bytesImage != null) {
+      setState(() {
+        //converte Uint8List to base64
+        _formData['imagem'] = base64Encode(bytesImage!);
+      });
+    }
+
+
+  a imagem salva no banco é base64 dentro do campo varchar  
+
+
+*/
