@@ -36,6 +36,7 @@ class UsuarioProvider with ChangeNotifier {
           nome: itemData['nome'] ?? '',
           email: itemData['email'] ?? '',
           senha: itemData['senha'] ?? '',
+          imagem: itemData['imagem'] ?? '',
         ),
       );
     });
@@ -52,6 +53,7 @@ class UsuarioProvider with ChangeNotifier {
       nome: registro['nome'] as String,
       email: registro['email'] as String,
       senha: registro['senha'] as String,
+      imagem: registro['imagem'] as String,
     );
 
     if (hasId) {
@@ -67,6 +69,7 @@ class UsuarioProvider with ChangeNotifier {
       "nome": usuario.nome,
       "email": usuario.email,
       "senha": usuario.senha,
+      "imagem": usuario.imagem,
     };
     final token = AuthProvider.authUsuario.token;
     final response = await http.post(
@@ -80,6 +83,7 @@ class UsuarioProvider with ChangeNotifier {
       nome: usuario.nome,
       email: usuario.email,
       senha: usuario.senha,
+      imagem: usuario.imagem,
     );
     usuarios.add(registro);
     notifyListeners();
@@ -95,6 +99,7 @@ class UsuarioProvider with ChangeNotifier {
       "nome": usuario.nome,
       "email": usuario.email,
       "senha": usuario.senha,
+      "imagem": usuario.imagem,
     };
 
     print('envio : $envio - $index');
@@ -118,13 +123,13 @@ class UsuarioProvider with ChangeNotifier {
     print('dentro do reove');
     final token = AuthProvider.authUsuario.token;
     final index = usuarios.indexWhere((element) => element.id == id);
-    final _urld = Uri.parse('${Constantes.urlBase}/$id');
+    final urld = Uri.parse('${Constantes.urlBase}/$id');
 
-    print(_urld);
+    print(urld);
 
     if (index >= 0) {
       await http.delete(
-        _urld,
+        urld,
         headers: <String, String>{'Authorization': token},
       );
       usuarios.removeWhere((item) => id == item.id);

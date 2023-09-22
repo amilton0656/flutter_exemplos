@@ -28,18 +28,21 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
   Uint8List? bytesImage;
 
   pegaImagem() async {
-    final String _image = await open.openImage();
+    final String image = await open.openImage();
 
     // Image.memory(bytesImage, width: 200, height: 200);
     setState(() {
-      base64String = _image;
+      base64String = image;
       bytesImage = const Base64Decoder().convert(base64String!);
+      _formData['imagem'] = base64String as String;
     });
     print(base64String);
   }
 
   onSubmitForm() {
     _formKey.currentState?.save();
+
+    print('_formData  $_formData');
 
     setState(() => _isLoading = true);
 
@@ -82,6 +85,10 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
         _formData['nome'] = usuario.nome;
         _formData['email'] = usuario.email;
         _formData['senha'] = usuario.senha;
+        _formData['imagem'] = usuario.imagem;
+
+        base64String = usuario.imagem;
+        bytesImage = const Base64Decoder().convert(base64String!);
       } else {}
     }
   }
@@ -117,8 +124,18 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                   children: [
                     Container(
                       child: bytesImage != null
-                      ? Image.memory(bytesImage!, width: 200, height: 200)
-                      : null
+                          ? ClipOval(
+                              child: Image.memory(bytesImage!,
+                                  width: 120, height: 120),
+                            )
+                          : ClipOval(
+                              child: Image.asset(
+                                'assets/images/perfil.png',
+                                height: 120,
+                                width: 120,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                     ),
                     Form(
                       key: _formKey,

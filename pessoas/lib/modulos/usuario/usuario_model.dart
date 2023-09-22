@@ -3,12 +3,14 @@ class UsuarioModel {
   final String nome;
   final String email;
   final String senha;
+  final dynamic imagem;
 
   UsuarioModel({
     required this.id,
     required this.nome,
     required this.email,
     required this.senha,
+    required this.imagem,
   });
 
   set id(int id) {
