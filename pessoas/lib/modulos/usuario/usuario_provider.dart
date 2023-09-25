@@ -9,12 +9,16 @@ import '../../utils/constants.dart';
 import '../auth/auth_provider.dart';
 import 'usuario_model.dart';
 
-import 'package:pessoas/data/app_data.dart' as app_data;
-
 class UsuarioProvider with ChangeNotifier {
   final _url = Uri.parse(Constantes.urlBase);
 
   List<UsuarioModel> usuarios = [];
+
+  //Ping
+  Future<bool> ping() async {
+    final response = await http.get(Uri.parse('${Constantes.urlBase}/ping'));
+    return response.statusCode == 200 ? true : false;
+  }
 
   //Email
   Future<void> sendEmail(
@@ -29,7 +33,7 @@ class UsuarioProvider with ChangeNotifier {
   //loadUsuarios
   Future<List<UsuarioModel>> loadUsuarios() async {
     final token = AuthProvider.authUsuario.token;
-    usuarios = app_data.usuarios;
+    usuarios = [];
     final response = await http.get(
       _url,
       headers: <String, String>{'Authorization': token},

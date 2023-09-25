@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pessoas/modulos/auth/auth_provider.dart';
 import 'package:pessoas/modulos/auth/login_screen.dart';
-import 'package:pessoas/modulos/usuario/usuario_email.dart';
+import 'package:pessoas/modulos/home/home_screen.dart';
 import 'package:pessoas/modulos/usuario/usuario_provider.dart';
-import 'package:pessoas/pdf/pdf3.dart';
-import 'package:pessoas/pdf/pdf_page.dart';
-import 'package:pessoas/pdf/pdf_teste.dart';
-import 'package:pessoas/teste.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -45,7 +41,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         debugShowCheckedModeBanner: false,
-        home: const LoginScreen(),
+        home: const HomeScreen(),
       ),
     );
   }

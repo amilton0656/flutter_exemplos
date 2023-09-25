@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pessoas/models/models.dart';
 import 'package:pessoas/modulos/usuario/usuario_provider.dart';
 import 'package:pessoas/widgets/custom_text_field.dart';
@@ -26,12 +27,28 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
   String? base64String = '';
   Uint8List? bytesImage;
 
-  pegaImagem() async {
+  _getImagemCamera() async {
     bytesImage = await open.openImage();
     if (bytesImage != null) {
       setState(() {
         _formData['imagem'] = base64Encode(bytesImage!);
       });
+    }
+  }
+
+  _getImagemGaleria() async {
+    final ImagePicker picker = ImagePicker();
+
+    try {
+      XFile? imagefile = await picker.pickImage(source: ImageSource.gallery);
+      if (imagefile != null) {
+        bytesImage = await imagefile.readAsBytes();
+        setState(() {
+          _formData['imagem'] = base64Encode(bytesImage!);
+        });
+      }
+    } catch (err) {
+      print(err);
     }
   }
 
@@ -172,14 +189,32 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       child: Column(
+                        // crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           mostraImagemPerfil(bytesImage),
-                          TextButton(
-                            onPressed: () {
-                              pegaImagem();
-                            },
-                            child: const Text('Atualizsar Imagem'),
+                          Container(
+                            child: const Text('Atualizar Imagem'),
                           ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton.icon(
+                                onPressed: () {
+                                  _getImagemCamera();
+                                },
+                                icon: const Icon(Icons.camera),
+                                label: const Text('Câmera'),
+                              ),
+                              SizedBox(width: 30),
+                              TextButton.icon(
+                                onPressed: () {
+                                  _getImagemGaleria();
+                                },
+                                icon: const Icon(Icons.attach_file),
+                                label: const Text('Galeria'),
+                              ),
+                            ],
+                          )
                         ],
                       ),
                     ),
