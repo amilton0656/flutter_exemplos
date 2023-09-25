@@ -45,6 +45,11 @@ dependencies:
   path_provider: ^2.1.1
   printing: ^5.11.0
   pdf: ^3.10.4
+  share_extend: ^2.0.0
+  flutter_full_pdf_viewer_null_safe: ^1.0.0
+  open_document: ^1.0.7
+  mailer: ^6.0.1
+  flutter_email_sender: ^6.0.2
 
 dev_dependencies:
   flutter_test:

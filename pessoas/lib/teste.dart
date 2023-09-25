@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
@@ -10,11 +8,11 @@ class Teste extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: ElevatedButton(
           onPressed: _createPDF,
-          child: const Text('Create PDF'),
+          child: Text('Create PDF'),
         ),
       ),
     );
@@ -22,7 +20,6 @@ class Teste extends StatelessWidget {
 }
 
 Future<void> _createPDF() async {
-  
   PdfDocument document = PdfDocument();
   final page = document.pages.add();
 

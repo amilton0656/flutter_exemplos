@@ -9,15 +9,27 @@ import '../../utils/constants.dart';
 import '../auth/auth_provider.dart';
 import 'usuario_model.dart';
 
+import 'package:pessoas/data/app_data.dart' as app_data;
+
 class UsuarioProvider with ChangeNotifier {
   final _url = Uri.parse(Constantes.urlBase);
 
   List<UsuarioModel> usuarios = [];
 
+  //Email
+  Future<void> sendEmail(
+      {String to = '', String subject = '', String text = ''}) async {
+    final response = await http.post(
+      Uri.parse('${Constantes.urlBase}/email'),
+      body: {"to": to, "subject": subject, "text": text},
+    );
+    print('response ${response.statusCode}');
+  }
+
   //loadUsuarios
   Future<List<UsuarioModel>> loadUsuarios() async {
     final token = AuthProvider.authUsuario.token;
-    usuarios = [];
+    usuarios = app_data.usuarios;
     final response = await http.get(
       _url,
       headers: <String, String>{'Authorization': token},
@@ -30,14 +42,13 @@ class UsuarioProvider with ChangeNotifier {
     final data = jsonDecode(response.body);
 
     data.forEach((itemData) {
-
       usuarios.add(
         UsuarioModel(
           id: itemData['id'] ?? 0,
           nome: itemData['nome'] ?? '',
           email: itemData['email'] ?? '',
           senha: itemData['senha'] ?? '',
-          imagem: itemData['imagem'],
+          imagem: itemData['imagem'] ?? '',
         ),
       );
     });
@@ -54,7 +65,7 @@ class UsuarioProvider with ChangeNotifier {
       nome: registro['nome'] as String,
       email: registro['email'] as String,
       senha: registro['senha'] as String,
-      imagem: registro['imagem'] as String,
+      imagem: registro['imagem'] == null ? '' : registro['imagem'] as String,
     );
 
     if (hasId) {

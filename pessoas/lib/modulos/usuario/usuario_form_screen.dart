@@ -105,12 +105,46 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
     }
   }
 
+  String getHtml() {
+    String html = '<html>'
+        '<body>'
+        '<div style=" display: flex; justify-content: center">'
+        '<div style="width: 350px; font-size: 25; font-weight: bold; padding:  30px;">Cadastro do Usuário</div>'
+        '</div>'
+        '<div style=" display: flex; justify-content: center;">'
+        '<div style="width: 150px;">Id</div>'
+        '<div style="width: 300px;">${_formData['id'].toString()}</div>'
+        ' </div>'
+        '<div style=" display: flex; justify-content: center">'
+        '<div style="width: 150px;">Nome</div>'
+        '<div style="width: 300px;">${_formData['nome'] as String}</div>'
+        '</div>'
+        '<div style=" display: flex; justify-content: center">'
+        '<div style="width: 150px;">Email</div>'
+        '<div style="width: 300px;">${_formData['email'] as String}</div>'
+        '</div>'
+        '</body>'
+        '</html>';
+
+    return html;
+  }
+
   @override
   Widget build(BuildContext context) {
     final largura = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cadastro de Usuário'),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Provider.of<UsuarioProvider>(context, listen: false).sendEmail(
+                    to: 'amilton0656@gmail.com',
+                    subject: _formData['nome'] as String,
+                    text: getHtml());
+              },
+              icon: const Icon(Icons.email))
+        ],
       ),
       body: Stack(
         children: [
@@ -211,7 +245,6 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                               },
                               //  Navigator.of(context).pop(),
                               child: const Text('Salvar')),
-                          
                         ],
                       ),
                     ),

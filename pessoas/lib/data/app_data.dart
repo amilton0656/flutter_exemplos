@@ -1,10 +1,66 @@
 import '../models/models.dart';
 
-final List<Usuario> usuarios = [
-  Usuario(id: 1, nome: 'Amilton', email: 'amilton@email', senha: '11111'),
-  Usuario(id: 2, nome: 'Pedro', email: 'pedro@email', senha: '22222'),
-  Usuario(id: 3, nome: 'João', email: 'joao@email', senha: '33333'),
-  Usuario(id: 4, nome: 'Maria', email: 'maria@email', senha: '44444'),
+final List<UsuarioModel> usuarios = [
+  UsuarioModel(
+      id: 199,
+      nome: 'Amilton',
+      email: 'amilton@email',
+      senha: '11111',
+      imagem: ''),
+  UsuarioModel(
+      id: 299, nome: 'Pedro', email: 'pedro@email', senha: '22222', imagem: ''),
+  UsuarioModel(
+      id: 399, nome: 'João', email: 'joao@email', senha: '33333', imagem: ''),
+  UsuarioModel(
+      id: 499, nome: 'Maria', email: 'maria@email', senha: '44444', imagem: ''),
+  UsuarioModel(
+      id: 198,
+      nome: 'Amilton',
+      email: 'amilton@email',
+      senha: '11111',
+      imagem: ''),
+  UsuarioModel(
+      id: 298, nome: 'Pedro', email: 'pedro@email', senha: '22222', imagem: ''),
+  UsuarioModel(
+      id: 398, nome: 'João', email: 'joao@email', senha: '33333', imagem: ''),
+  UsuarioModel(
+      id: 498, nome: 'Maria', email: 'maria@email', senha: '44444', imagem: ''),
+  UsuarioModel(
+      id: 197,
+      nome: 'Amilton',
+      email: 'amilton@email',
+      senha: '11111',
+      imagem: ''),
+  UsuarioModel(
+      id: 297, nome: 'Pedro', email: 'pedro@email', senha: '22222', imagem: ''),
+  UsuarioModel(
+      id: 397, nome: 'João', email: 'joao@email', senha: '33333', imagem: ''),
+  UsuarioModel(
+      id: 497, nome: 'Maria', email: 'maria@email', senha: '44444', imagem: ''),
+  UsuarioModel(
+      id: 196,
+      nome: 'Amilton',
+      email: 'amilton@email',
+      senha: '11111',
+      imagem: ''),
+  UsuarioModel(
+      id: 296, nome: 'Pedro', email: 'pedro@email', senha: '22222', imagem: ''),
+  UsuarioModel(
+      id: 396, nome: 'João', email: 'joao@email', senha: '33333', imagem: ''),
+  UsuarioModel(
+      id: 496, nome: 'Maria', email: 'maria@email', senha: '44444', imagem: ''),
+  UsuarioModel(
+      id: 195,
+      nome: 'Amilton',
+      email: 'amilton@email',
+      senha: '11111',
+      imagem: ''),
+  UsuarioModel(
+      id: 295, nome: 'Pedro', email: 'pedro@email', senha: '22222', imagem: ''),
+  UsuarioModel(
+      id: 395, nome: 'João', email: 'joao@email', senha: '33333', imagem: ''),
+  UsuarioModel(
+      id: 495, nome: 'Maria', email: 'maria@email', senha: '44444', imagem: ''),
 ];
 
 final List<Pessoa> pessoas = [

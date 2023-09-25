@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pessoas/modulos/usuario/usuario_form_screen.dart';
+import 'package:pessoas/modulos/usuario/usuario_lista_pdf.dart';
 import 'package:pessoas/utils/paleta_cores.dart';
 import 'package:provider/provider.dart';
 
@@ -73,6 +74,17 @@ class _UsuarioListaScreenState extends State<UsuarioListaScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Usuários'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: IconButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (ctx) => UsuarioListaPdf(usuarios: usuarios)));
+                },
+                icon: const Icon(Icons.picture_as_pdf)),
+          ),
+        ],
       ),
       body: Consumer<UsuarioProvider>(
         builder: (context, value, child) => RefreshIndicator(
