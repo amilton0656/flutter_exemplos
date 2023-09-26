@@ -36,9 +36,7 @@ class ItemTile extends StatelessWidget {
                 : TextDecoration.none,
           ),
         ),
-        trailing: 'Amilton,Selene,Eduardo'.contains(item.usuario)
-            ? Text(item.usuario.substring(0, 3))
-            : null,
+        trailing: Text(item.grupo.toString()),
       ),
     );
   }

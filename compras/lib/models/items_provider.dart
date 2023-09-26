@@ -92,6 +92,7 @@ class ItemsProvider with ChangeNotifier {
 
   Future<void> updateItem(ItemModel item) async {
     final index = items.indexWhere((element) => element.id == item.id);
+    final indexUsuario = itemsUsuario.indexWhere((element) => element.id == id);
 
     if (index >= 0) {
       await http.patch(
@@ -103,7 +104,7 @@ class ItemsProvider with ChangeNotifier {
       );
 
       items[index] = item;
-      itemsUsuario[index] = item;
+      itemsUsuario[indexUsuario] = item;
       notifyListeners();
     }
   }

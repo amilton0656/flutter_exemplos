@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 import 'package:provider/provider.dart';
 import 'package:supermercado/app_data.dart';
@@ -22,11 +23,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    Provider.of<ItemProvider>(context, listen: false).loadItems();
-    //.then((value) {
-    //   Provider.of<ItemProvider>(context, listen: false).getItems('Todos');
-    // });
-    Provider.of<ItemProvider>(context, listen: false).getItems('Todos');
+      scheduleMicrotask(() {
+        Provider.of<ItemProvider>(context, listen: false).loadItems();
+      });
+      scheduleMicrotask(() {
+        Provider.of<ItemProvider>(context, listen: false).getItems('Todos');
+      });
+
   }
 
   void _showModalBottomSheet({ItemModel? item}) {

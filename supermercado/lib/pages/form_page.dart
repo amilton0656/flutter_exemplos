@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supermercado/item_model.dart';
 import 'package:supermercado/item_provider.dart';
+import 'package:supermercado/pages/constantes.dart' as constantes;
+import 'package:supermercado/pages/historico_page.dart';
 
 class FormPage extends StatefulWidget {
   final String usuario;
@@ -17,6 +19,8 @@ class _FormPageState extends State<FormPage> {
   final _formKey = GlobalKey<FormState>();
   final _formData = <String, Object>{};
 
+  final TextEditingController _descricaoController = TextEditingController();
+
   bool _isLoading = false;
 
   @override
@@ -28,23 +32,37 @@ class _FormPageState extends State<FormPage> {
 
       if (widget.item != null) {
         final item = widget.item as ItemModel;
+        // if (!constantes.grupos.contains(item.grupo)) {}
 
         _formData['id'] = item.id;
+        _formData['usuario'] = item.usuario;
         _formData['descricao'] = item.descricao;
         _formData['quantidade'] = item.quantidade;
-        _formData['usuario'] = item.usuario;
+        _formData['grupo'] =
+            constantes.grupos.contains(item.grupo) ? item.grupo : 'Outros';
         _formData['isBought'] = item.isBought;
+        _descricaoController.text = item.descricao;
       } else {
         _formData['usuario'] = widget.usuario;
+        _formData['descricao'] = '';
+        _formData['quantidade'] = '';
+        _formData['grupo'] = constantes.grupos[4];
         _formData['isBought'] = false;
       }
     }
   }
 
+  onDescricao(String value) {
+    setState(() {
+      _formData['descricao'] = value;
+    });
+    print('onDescricao $value - ${_formData['descricao']}');
+  }
+
   onSubmitForm() {
     _formKey.currentState?.save();
 
-    setState(() => _isLoading = true);
+    setState(() => _isLoading = false);
 
     Provider.of<ItemProvider>(context, listen: false)
         .saveItem(_formData, widget.usuario)
@@ -94,8 +112,35 @@ class _FormPageState extends State<FormPage> {
                 const SizedBox(
                   height: 30,
                 ),
+                IconButton(
+                  onPressed: () async {
+                    String? response = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            const HistoricoPage(),
+                      ),
+                    );
+                    if (response != null) {
+                      setState(() {
+                        _descricaoController.text = response;
+                      });
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.search,
+                    size: 40,
+                  ),
+                ),
+
+                const SizedBox(
+                  height: 30,
+                ),
+
+                //descrição
                 TextFormField(
-                  initialValue: _formData['descricao']?.toString(),
+                  // initialValue: _formData['descricao']?.toString(),
+                  controller: _descricaoController,
                   onSaved: (descricao) =>
                       _formData['descricao'] = descricao ?? '',
                   decoration: const InputDecoration(
@@ -105,10 +150,12 @@ class _FormPageState extends State<FormPage> {
                 const SizedBox(
                   height: 30,
                 ),
+
+                //Quantidade
                 TextFormField(
                   initialValue: _formData['quantidade']?.toString(),
                   onSaved: (quantidade) =>
-                      _formData['quantidade'] = double.parse(quantidade ?? '0'),
+                      _formData['quantidade'] = quantidade ?? '',
                   decoration: const InputDecoration(
                     labelText: 'Quantidade',
                   ),
@@ -116,6 +163,65 @@ class _FormPageState extends State<FormPage> {
                 const SizedBox(
                   height: 30,
                 ),
+
+                /*
+                //Radio - Grupo
+                Column(
+                  children: [
+
+                    RadioListTile(
+                      title: const Text("Horti", style: TextStyle(color: Colors.black)),
+                      value: "Horti",
+                      groupValue: _formData['grupo'] as String,
+                      onChanged: (value) {
+                        setState(() {
+                          _formData['grupo'] = value.toString();
+                        });
+                      },
+                    ),
+                    RadioListTile(
+                      title: const Text("Açougue", style: TextStyle(color: Colors.black)),
+                      value: "Açougue",
+                      groupValue: _formData['grupo'] as String,
+                      onChanged: (value) {
+                        setState(() {
+                          _formData['grupo'] = value.toString();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+
+
+                */
+
+                //DropDown - Grupo
+                DropdownButton(
+                  value: _formData['grupo'].toString(),
+                  style: const TextStyle(color: Colors.black),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _formData['grupo'] = newValue ?? '';
+                    });
+                  },
+                  items: constantes.grupos.map((itemone) {
+                    return DropdownMenuItem(
+                        value: itemone, child: Text(itemone));
+                  }).toList(),
+                ),
+
+                /*
+
+DropdownMenuItem<String>(
+          value: constantes.grupos[i],
+          child: Text(
+            _formData['grupo'].toString(),
+            style: const TextStyle(color: Colors.black),
+          ),
+        ),
+      );
+                */
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [

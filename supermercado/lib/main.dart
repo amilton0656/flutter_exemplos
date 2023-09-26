@@ -19,7 +19,8 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        title: 'Supermercado',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         home: const HomePage(),
+
       ),
     );
   }
