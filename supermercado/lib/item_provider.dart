@@ -1,11 +1,14 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:supermercado/item_model.dart';
+import 'package:http/http.dart' as http;
 import 'package:supermercado/app_data.dart' as app_data;
 
 class ItemProvider with ChangeNotifier {
-  // final _baseUrl = '';
+  // final _baseUrl = 'http://amilton.com.br/api';
+  final _baseUrl = 'http://192.168.1.81:21276';
 
   List<String> compras = ['feijão', 'arroz', 'carne moída', 'café'];
   List<ItemModel> items = app_data.items;
@@ -16,7 +19,41 @@ class ItemProvider with ChangeNotifier {
   }
 
   Future<List<ItemModel>> loadItems() async {
-    items = app_data.items;
+    items = []; //app_data.items;
+
+    final url = Uri.parse('$_baseUrl/mktitem');
+
+    try {
+      final response = await http.get(url);
+      // print(response.body);
+
+      final data = jsonDecode(response.body);
+      print(data);
+
+      data.forEach((itemData) {
+        items.add(
+          ItemModel(
+            id: itemData['id'],
+            usuario: itemData['usuario'] ?? '',
+            descricao: itemData['descricao'] ?? '',
+            quantidade: itemData['quantidade'] ?? '',
+            grupo: itemData['grupo'] ?? '',
+            isbought: itemData['isbought'] == 0 ? false : true,
+          ),
+        );
+      });
+      items.sort((a, b) {
+      // Primeiro, comparar pelo campo nome
+      int comparacao = a.grupo.compareTo(b.grupo);
+      if (comparacao != 0) {
+        return comparacao;
+      }
+      // Se os nomes forem iguais, comparar pelo campo idade
+      return a.descricao.compareTo(b.descricao);
+    });
+    } catch (err) {
+      print('');
+    }
 
     items.sort((a, b) {
       // Primeiro, comparar pelo campo nome
@@ -27,27 +64,7 @@ class ItemProvider with ChangeNotifier {
       // Se os nomes forem iguais, comparar pelo campo idade
       return a.descricao.compareTo(b.descricao);
     });
-
-    // final response = await http.get(Uri.parse('$_baseUrl.json'));
-
-    // if (jsonDecode(response.body) == null) {
-    //   return [];
-    // }
-
-    // Map<String, dynamic> data = jsonDecode(response.body);
-    // data.forEach((itemId, itemData) {
-    //   items.add(
-    //     ItemModel(
-    //       id: itemId,
-    //       descricao: itemData['descricao'] as String,
-    //       quantidade: itemData['quantidade'] as double,
-    //       usuario: itemData['usuario'],
-    //       isBought: itemData['isBought'],
-    //     ),
-    //   );
-    // });
-
-    // notifyListeners();
+    notifyListeners();
     return items;
   } //load
 
@@ -61,7 +78,7 @@ class ItemProvider with ChangeNotifier {
     return itemsUsuario;
   } //getItems
 
-  Future<void> saveItem(Map<String, Object> registro, String usuario) {
+  Future<bool> saveItem(Map<String, Object> registro, String usuario) {
     var hasId = registro['id'] != null;
 
     final ItemModel item = ItemModel(
@@ -70,7 +87,7 @@ class ItemProvider with ChangeNotifier {
       descricao: registro['descricao'] as String,
       quantidade: registro['quantidade'] as String,
       grupo: registro['grupo'] as String,
-      isBought: registro['isBought'] as bool,
+      isbought: registro['isBought'] as bool,
     );
 
     if (hasId) {
@@ -80,50 +97,84 @@ class ItemProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addItem(ItemModel item, String usuario) async {
-    // final response = await http.post(
-    //   Uri.parse('$_baseUrl.json'),
-    //   body: jsonEncode({
-    //     "descricao": item.descricao,
-    //     "quantidade": item.quantidade,
-    //     "usuario": item.usuario.toString(),
-    //     "isBought": false,
-    //   }),
-    // );
-    // final id = jsonDecode(response.body)['name'];
-    final ItemModel registro = ItemModel(
-      id: item.id,
-      usuario: item.usuario,
-      descricao: item.descricao,
-      quantidade: item.quantidade,
-      grupo: item.grupo,
-      isBought: false,
-    );
-    items.add(registro);
-    itemsUsuario.add(registro);
-    if (!compras.contains(item.descricao)) {
-      compras.add(item.descricao);
+  Future<bool> addItem(ItemModel item, String usuario) async {
+    final url = Uri.parse('$_baseUrl/mktitem');
+
+    final envio = {
+      "usuario": item.usuario.toString(),
+      "descricao": item.descricao,
+      "quantidade": item.quantidade,
+      "grupo": item.grupo,
+      "isbought": "false"
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        body: envio,
+      );
+      if (response.statusCode == 200) {
+        final id = jsonDecode(response.body)['id'];
+        final ItemModel registro = ItemModel(
+          id: id,
+          usuario: item.usuario,
+          descricao: item.descricao,
+          quantidade: item.quantidade,
+          grupo: item.grupo,
+          isbought: false,
+        );
+        items.add(registro);
+        itemsUsuario.add(registro);
+        // if (!compras.contains(item.descricao)) {
+        //   compras.add(item.descricao);
+        // }
+        notifyListeners();
+        return true;
+      } else {
+        return false;
+      }
+    } catch (err) {
+      return false;
     }
-    notifyListeners();
   }
 
-  Future<void> updateItem(ItemModel item) async {
+  Future<bool> updateItem(ItemModel item) async {
     final index = items.indexWhere((element) => element.id == item.id);
+
     final indexUsuario =
         itemsUsuario.indexWhere((element) => element.id == item.id);
 
-    // if (index >= 0) {
-    //   await http.patch(
-    //     Uri.parse('$_baseUrl/${item.id}.json'),
-    //     body: jsonEncode({
-    //       "descricao": item.descricao,
-    //       "quantidade": item.quantidade,
-    //     }),
-    //   );
+    if (index >= 0) {
+      try {
+        final url = Uri.parse('$_baseUrl/mktitem');
+        final response = await http.patch(url, body: {
+          "id": item.id.toString(),
+          "usuario": item.usuario,
+          "descricao": item.descricao,
+          "quantidade": item.quantidade,
+          "grupo": item.grupo,
+          "isbought": item.isbought.toString()
+        });
 
-    items[index] = item;
-    itemsUsuario[indexUsuario] = item;
-    notifyListeners();
+        if (response.statusCode == 200) {
+          items[index] = item;
+          if (indexUsuario >= 0) {
+            itemsUsuario[indexUsuario] = item;
+          }
+
+          // if (!compras.contains(item.descricao)) {
+          //   compras.add(item.descricao);
+          // }
+          notifyListeners();
+          return true;
+        } else {
+          return false;
+        }
+      } catch (err) {
+        return false;
+      }
+    }
+    return false;
   }
 
   void itemBought(ItemModel item) async {
@@ -139,7 +190,7 @@ class ItemProvider with ChangeNotifier {
       //     }),
       //   );
 
-      items[index].isBought = !items[index].isBought;
+      items[index].isbought = !items[index].isbought;
       items[index] = item;
       notifyListeners();
     }
@@ -150,22 +201,31 @@ class ItemProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> removeItem(int id) async {
+  Future<bool> removeItem(int id) async {
     final index = items.indexWhere((element) => element.id == id);
     final indexUsuario = itemsUsuario.indexWhere((element) => element.id == id);
 
     if (index >= 0) {
-      // await http.delete(
-      //   Uri.parse('$_baseUrl/$id.json'),
-      // );
-      items.removeWhere((item) => id == item.id);
-    }
+      try {
+        final url = Uri.parse('$_baseUrl/mktitem/$id');
+        final response = await http.delete(url);
 
-    if (indexUsuario >= 0) {
-      itemsUsuario.removeWhere((item) => id == item.id);
+        if (response.statusCode == 200) {
+          items.removeWhere((item) => id == item.id);
+          if (indexUsuario >= 0) {
+            itemsUsuario.removeWhere((item) => id == item.id);
+          }
+          notifyListeners();
+          return true;
+        } else {
+          return false;
+        }
+      } catch (err) {
+        return false;
+      }
+    } else {
+      return false;
     }
-
-    notifyListeners();
   }
 
   Future<void> removeHistorico(String descricao) async {
@@ -180,5 +240,4 @@ class ItemProvider with ChangeNotifier {
 
     notifyListeners();
   }
-
 } //class

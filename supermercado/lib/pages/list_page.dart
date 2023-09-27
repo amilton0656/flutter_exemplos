@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supermercado/components/item_tile.dart';
@@ -26,20 +28,24 @@ class _ListPageState extends State<ListPage> {
   @override
   void initState() {
     super.initState();
-
-    setState(() {
-      loadedItems = Provider.of<ItemProvider>(context, listen: false)
-          .getItems(widget.usuario);
+    scheduleMicrotask(() {
+      setState(() {
+        loadedItems = Provider.of<ItemProvider>(context, listen: false)
+            .getItems(widget.usuario);
+      });
     });
   }
 
   Future<void> refreshItems(BuildContext context) async {
     loadedItems = Provider.of<ItemProvider>(context, listen: false)
         .getItems(widget.usuario);
+    print('object');
   }
 
   @override
   Widget build(BuildContext context) {
+    loadedItems = Provider.of<ItemProvider>(context, listen: false)
+        .getItems(widget.usuario);
     return Consumer<ItemProvider>(
       builder: (ctx, items, child) => RefreshIndicator(
         onRefresh: () => refreshItems(context),

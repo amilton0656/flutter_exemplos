@@ -17,7 +17,7 @@ class ItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String pre = item.isBought ? '---> ' : '';
+    String pre = item.isbought ? '---> ' : '';
     return GestureDetector(
       onDoubleTap: () {
         Provider.of<ItemProvider>(context, listen: false).itemBought(item);
@@ -31,7 +31,7 @@ class ItemTile extends StatelessWidget {
         title: Text(
           pre + item.descricao,
           style: TextStyle(
-            decoration: item.isBought
+            decoration: item.isbought
                 ? TextDecoration.lineThrough
                 : TextDecoration.none,
           ),

@@ -40,7 +40,7 @@ class _FormPageState extends State<FormPage> {
         _formData['quantidade'] = item.quantidade;
         _formData['grupo'] =
             constantes.grupos.contains(item.grupo) ? item.grupo : 'Outros';
-        _formData['isBought'] = item.isBought;
+        _formData['isBought'] = item.isbought;
         _descricaoController.text = item.descricao;
       } else {
         _formData['usuario'] = widget.usuario;
@@ -59,33 +59,16 @@ class _FormPageState extends State<FormPage> {
     print('onDescricao $value - ${_formData['descricao']}');
   }
 
-  onSubmitForm() {
+  Future<bool> onSubmitForm() async {
     _formKey.currentState?.save();
 
     setState(() => _isLoading = false);
 
-    Provider.of<ItemProvider>(context, listen: false)
-        .saveItem(_formData, widget.usuario)
-        .catchError((error) {
-      return showDialog<void>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Erro !'),
-          content: const Text('Ocorreu um erro.'),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  setState(() => _isLoading = false);
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'))
-          ],
-        ),
-      );
-    }).then((value) {
-      setState(() => _isLoading = false);
-      Navigator.of(context).pop();
-    });
+    final response = await Provider.of<ItemProvider>(context, listen: false)
+        .saveItem(_formData, widget.usuario);
+
+    return response;
+
   }
 
   @override
@@ -139,7 +122,6 @@ class _FormPageState extends State<FormPage> {
 
                 //descrição
                 TextFormField(
-                  // initialValue: _formData['descricao']?.toString(),
                   controller: _descricaoController,
                   onSaved: (descricao) =>
                       _formData['descricao'] = descricao ?? '',
@@ -164,37 +146,6 @@ class _FormPageState extends State<FormPage> {
                   height: 30,
                 ),
 
-                /*
-                //Radio - Grupo
-                Column(
-                  children: [
-
-                    RadioListTile(
-                      title: const Text("Horti", style: TextStyle(color: Colors.black)),
-                      value: "Horti",
-                      groupValue: _formData['grupo'] as String,
-                      onChanged: (value) {
-                        setState(() {
-                          _formData['grupo'] = value.toString();
-                        });
-                      },
-                    ),
-                    RadioListTile(
-                      title: const Text("Açougue", style: TextStyle(color: Colors.black)),
-                      value: "Açougue",
-                      groupValue: _formData['grupo'] as String,
-                      onChanged: (value) {
-                        setState(() {
-                          _formData['grupo'] = value.toString();
-                        });
-                      },
-                    ),
-                  ],
-                ),
-
-
-                */
-
                 //DropDown - Grupo
                 DropdownButton(
                   value: _formData['grupo'].toString(),
@@ -210,18 +161,6 @@ class _FormPageState extends State<FormPage> {
                   }).toList(),
                 ),
 
-                /*
-
-DropdownMenuItem<String>(
-          value: constantes.grupos[i],
-          child: Text(
-            _formData['grupo'].toString(),
-            style: const TextStyle(color: Colors.black),
-          ),
-        ),
-      );
-                */
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -234,13 +173,36 @@ DropdownMenuItem<String>(
                             child: const Text('Sair'),
                           ),
                     ElevatedButton(
-                      onPressed: () {
-                        onSubmitForm();
+                      onPressed: () async {
+                        if (await onSubmitForm() == false) {
+                          // ignore: use_build_context_synchronously
+                          showDialog<void>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Erro !'),
+                        content: const Text('Ocorreu um erro.'),
+                        actions: [
+                          TextButton(
+                              onPressed: () {
+                                setState(() => _isLoading = false);
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('OK'))
+                        ],
+                      ),
+                    );
+                          
+                        } else {
+                          setState(() => _isLoading = false);
+                          // ignore: use_build_context_synchronously
+                          Navigator.of(context).pop();
+                        }
                       },
                       child: const Text('Salvar'),
                     ),
                   ],
                 ),
+                
               ],
             ),
           ),

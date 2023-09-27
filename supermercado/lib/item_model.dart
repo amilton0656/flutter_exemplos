@@ -4,7 +4,7 @@ class ItemModel {
   String descricao;
   String quantidade;
   String grupo;
-  bool isBought;
+  bool isbought;
 
   ItemModel({
     required this.id,
@@ -12,6 +12,7 @@ class ItemModel {
     required this.descricao,
     required this.quantidade,
     this.grupo = "Outros",
-    this.isBought = false,
+    this.isbought = false,
   });
 }
+
