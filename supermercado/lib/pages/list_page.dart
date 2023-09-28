@@ -37,9 +37,21 @@ class _ListPageState extends State<ListPage> {
   }
 
   Future<void> refreshItems(BuildContext context) async {
-    loadedItems = Provider.of<ItemProvider>(context, listen: false)
-        .getItems(widget.usuario);
-    print('object');
+    scheduleMicrotask(() {
+      Provider.of<ItemProvider>(context, listen: false).loadItems()
+      .then((x) =>
+        loadedItems = Provider.of<ItemProvider>(context, listen: false)
+          .getItems(widget.usuario)
+      );
+    });
+
+    scheduleMicrotask(() async  {
+      loadedItems = Provider.of<ItemProvider>(context, listen: false)
+          .getItems(widget.usuario);
+      setState(() {
+        loadedItems = loadedItems;
+      });
+    });
   }
 
   @override

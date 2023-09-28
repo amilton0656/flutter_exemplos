@@ -7,6 +7,7 @@ import 'package:supermercado/item_model.dart';
 import 'package:supermercado/item_provider.dart';
 import 'package:supermercado/pages/form_page.dart';
 import 'package:supermercado/pages/list_page.dart';
+import 'package:supermercado/pages/list_page_pdf.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,13 +24,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-      scheduleMicrotask(() {
-        Provider.of<ItemProvider>(context, listen: false).loadItems();
-      });
-      scheduleMicrotask(() {
-        Provider.of<ItemProvider>(context, listen: false).getItems('Todos');
-      });
-
+    scheduleMicrotask(() {
+      Provider.of<ItemProvider>(context, listen: false).loadItems();
+    });
+    scheduleMicrotask(() {
+      Provider.of<ItemProvider>(context, listen: false).getItems('Todos');
+    });
   }
 
   void _showModalBottomSheet({ItemModel? item}) {
@@ -52,22 +52,76 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: corFundo,
         foregroundColor: Colors.white,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
+
+          //Botao Pdf
+          IconButton(
+              onPressed: () {
+                final usu = ['Todos','Amilton', 'Selene', 'Eduardo'][currentIndex];
+                final usus = Provider.of<ItemProvider>(context, listen: false)
+                    .getItems('Amilton');
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (ctx) => ItemsListaPdf(
+                          usuario: usu,
+                          items: usus,
+                        )));
+              },
+              icon: const Icon(Icons.picture_as_pdf)),
+
+          //Botao Limpar
+          Visibility(
+            visible: currentIndex == 0 ? false : true,
+            child: IconButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                          title: const Text('Limpar Lista?'),
+                          actions: [
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Não')),
+                            TextButton(
+                                onPressed: () {
+                                  final usu = [
+                                    'Amilton',
+                                    'Selene',
+                                    'Eduardo'
+                                  ][currentIndex - 1];
+                                  Provider.of<ItemProvider>(context,
+                                          listen: false)
+                                      .limpaLista(usu);
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Sim')),
+                          ],
+                        ));
+              },
+              icon: const Icon(
+                Icons.clear_all,
+                color: Colors.white,
+              ),
+            ),
+          ),
+
+          //Botao carrinho
+          Visibility(
+            visible: currentIndex == 0 ? false : true,
             child: IconButton(
               onPressed: currentIndex > 0
                   ? () {
                       _showModalBottomSheet();
                     }
                   : null,
-              icon: Icon(
+              icon: const Icon(
                 Icons.shopping_cart,
-                color: currentIndex > 0
-                    ? Colors.white
-                    : Colors.white.withAlpha(100),
+                color: Colors.white,
               ),
             ),
           ),
+          
+          
         ],
       ),
       body: PageView(

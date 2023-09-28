@@ -18,23 +18,31 @@ class ItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String pre = item.isbought ? '---> ' : '';
+
+    TextStyle estilo = TextStyle(
+      decoration:
+          item.isbought ? TextDecoration.lineThrough : TextDecoration.none,
+    );
     return GestureDetector(
-      onDoubleTap: () {
-        Provider.of<ItemProvider>(context, listen: false).itemBought(item);
+      onDoubleTap: () async {
+        final response = await Provider.of<ItemProvider>(context, listen: false)
+            .itemBought(item);
       },
       onLongPress: () {
         onModal(item: item);
       },
       child: ListTile(
         textColor: Colors.black,
-        leading: Text(item.quantidade.toString()),
+        leading: SizedBox(
+          width: 50,
+          child: Text(
+            item.quantidade.toString(),
+            style: estilo,
+          ),
+        ),
         title: Text(
           pre + item.descricao,
-          style: TextStyle(
-            decoration: item.isbought
-                ? TextDecoration.lineThrough
-                : TextDecoration.none,
-          ),
+          style: estilo,
         ),
         trailing: Text(item.grupo.toString()),
       ),

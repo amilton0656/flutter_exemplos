@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:supermercado/item_historico.dart';
 import 'package:supermercado/item_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:supermercado/app_data.dart' as app_data;
@@ -10,12 +11,20 @@ class ItemProvider with ChangeNotifier {
   final _baseUrl = 'http://amilton.com.br/api';
   // final _baseUrl = 'http://192.168.1.81:21276';
 
-  List<String> compras = ['feijão', 'arroz', 'carne moída', 'café'];
+  List<HistoricoModel> compras = [
+    HistoricoModel(id: 1, descricao: 'Arroz'),
+    HistoricoModel(id: 1, descricao: 'Feijão'),
+    HistoricoModel(id: 1, descricao: 'Café'),
+    HistoricoModel(id: 1, descricao: 'Leite em pó'),
+    HistoricoModel(id: 1, descricao: 'Pão de trigo'),
+  ];
   List<ItemModel> items = app_data.items;
   List<ItemModel> itemsUsuario = [];
 
   Future<void> sortCompras() async {
-    compras.sort();
+    compras.sort((a, b) {
+      return a.descricao.compareTo(b.descricao);
+    });
   }
 
   Future<List<ItemModel>> loadItems() async {
@@ -28,7 +37,6 @@ class ItemProvider with ChangeNotifier {
       // print(response.body);
 
       final data = jsonDecode(response.body);
-      print(data);
 
       data.forEach((itemData) {
         items.add(
@@ -109,7 +117,6 @@ class ItemProvider with ChangeNotifier {
     };
 
     try {
-      print('dentro do try');
       final response = await http
           .post(
         url,
@@ -118,7 +125,6 @@ class ItemProvider with ChangeNotifier {
           .timeout(const Duration(seconds: 2), onTimeout: () {
         return http.Response('Error', 408);
       });
-      print('depois do try');
       if (response.statusCode == 200) {
         final id = jsonDecode(response.body)['id'];
         final ItemModel registro = ItemModel(
@@ -131,16 +137,18 @@ class ItemProvider with ChangeNotifier {
         );
         items.add(registro);
         itemsUsuario.add(registro);
-        // if (!compras.contains(item.descricao)) {
-        //   compras.add(item.descricao);
-        // }
+        final indexCompras = compras
+            .indexWhere((element) => element.descricao == item.descricao);
+        if (indexCompras < 0) {
+          addHistorico(item.descricao);
+          notifyListeners();
+        }
         notifyListeners();
         return true;
       } else {
         return false;
       }
     } catch (err) {
-      print('dentrop do catch');
       return false;
     }
   }
@@ -184,30 +192,6 @@ class ItemProvider with ChangeNotifier {
     return false;
   }
 
-  void itemBought(ItemModel item) async {
-    final index = items.indexWhere((element) => element.id == item.id);
-    final indexUsuario =
-        itemsUsuario.indexWhere((element) => element.id == item.id);
-
-    if (index >= 0) {
-      //   await http.patch(
-      //     Uri.parse('$_baseUrl/${item.id}.json'),
-      //     body: jsonEncode({
-      //       "isBought": !item.isBought,
-      //     }),
-      //   );
-
-      items[index].isbought = !items[index].isbought;
-      items[index] = item;
-      notifyListeners();
-    }
-
-    if (indexUsuario >= 0) {
-      itemsUsuario[indexUsuario] = item;
-    }
-    notifyListeners();
-  }
-
   Future<bool> removeItem(int id) async {
     final index = items.indexWhere((element) => element.id == id);
     final indexUsuario = itemsUsuario.indexWhere((element) => element.id == id);
@@ -235,16 +219,142 @@ class ItemProvider with ChangeNotifier {
     }
   }
 
-  Future<void> removeHistorico(String descricao) async {
-    final indexCompras = compras.indexWhere((element) => element == descricao);
+  Future<bool> limpaLista(String usuario) async {
+    try {
+      final url = Uri.parse('$_baseUrl/mktitem/limpalista/$usuario');
+      final response = await http.post(url, body: {"usuario": usuario});
 
-    if (indexCompras >= 0) {
-      // await http.delete(
-      //   Uri.parse('$_baseUrl/$id.json'),
-      // );
-      compras.removeWhere((item) => descricao == item);
+      if (response.statusCode == 200) {
+        items.removeWhere((item) => usuario == item.usuario);
+        itemsUsuario.removeWhere((item) => usuario == item.usuario);
+
+        notifyListeners();
+        return true;
+      } else {
+        return false;
+      }
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> itemBought(ItemModel item) async {
+    final index = items.indexWhere((element) => element.id == item.id);
+    final indexUsuario =
+        itemsUsuario.indexWhere((element) => element.id == item.id);
+
+    item.isbought = !item.isbought;
+
+    if (index >= 0) {
+      try {
+        final url = Uri.parse('$_baseUrl/mktitem');
+        final response = await http.patch(url, body: {
+          "id": item.id.toString(),
+          "isbought": item.isbought.toString()
+        });
+
+        if (response.statusCode == 200) {
+          items[index] = item;
+          if (indexUsuario >= 0) {
+            itemsUsuario[indexUsuario] = item;
+          }
+
+          notifyListeners();
+          return true;
+        } else {
+          return false;
+        }
+      } catch (err) {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  Future<List<HistoricoModel>> loadHistorico() async {
+    compras = []; //app_data.items;
+
+    final url = Uri.parse('$_baseUrl/mkthistorico');
+
+    try {
+      final response = await http.get(url);
+      // print(response.body);
+
+      final data = jsonDecode(response.body);
+
+      data.forEach((itemData) {
+        compras.add(
+          HistoricoModel(
+            id: itemData['id'],
+            descricao: itemData['descricao'] ?? '',
+          ),
+        );
+      });
+      items.sort((a, b) {
+        return a.descricao.compareTo(b.descricao);
+      });
+    } catch (err) {
+      print('');
     }
 
     notifyListeners();
+    return compras;
+  } //load
+
+  Future<bool> addHistorico(String descricao) async {
+    final url = Uri.parse('$_baseUrl/mkthistorico');
+
+    final envio = {
+      "descricao": descricao,
+    };
+
+    try {
+      final response = await http
+          .post(
+        url,
+        body: envio,
+      )
+          .timeout(const Duration(seconds: 2), onTimeout: () {
+        return http.Response('Error', 408);
+      });
+      if (response.statusCode == 200) {
+        final id = jsonDecode(response.body)['id'];
+        final HistoricoModel registro = HistoricoModel(
+          id: id,
+          descricao: descricao,
+        );
+        compras.add(registro);
+
+        notifyListeners();
+        return true;
+      } else {
+        return false;
+      }
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> removeHistorico(int id) async {
+    final index = compras.indexWhere((element) => element.id == id);
+
+    if (index >= 0) {
+      try {
+        final url = Uri.parse('$_baseUrl/mkthistorico/$id');
+        final response = await http.delete(url);
+
+        if (response.statusCode == 200) {
+          compras.removeWhere((item) => id == item.id);
+          notifyListeners();
+          return true;
+        } else {
+          return false;
+        }
+      } catch (err) {
+        return false;
+      }
+    } else {
+      return false;
+    }
   }
 } //class

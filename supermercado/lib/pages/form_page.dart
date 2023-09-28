@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:supermercado/item_historico.dart';
 import 'package:supermercado/item_model.dart';
 import 'package:supermercado/item_provider.dart';
 import 'package:supermercado/pages/constantes.dart' as constantes;
@@ -57,7 +58,6 @@ class _FormPageState extends State<FormPage> {
     setState(() {
       _formData['descricao'] = value;
     });
-    print('onDescricao $value - ${_formData['descricao']}');
   }
 
   Future<bool> onSubmitForm() async {
@@ -71,118 +71,119 @@ class _FormPageState extends State<FormPage> {
     return response;
   }
 
+  _mostraMensagem() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Container(
+          child: const Text('Ocorreu um erro!'),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     //acerto teclado
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Padding(
-        //acerto teclado
-        padding: mediaQueryData.viewInsets,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  widget.usuario,
-                  style: const TextStyle(
-                      fontSize: 25, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                IconButton(
-                  onPressed: () async {
-                    String? response = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            const HistoricoPage(),
-                      ),
-                    );
-                    if (response != null) {
+    return SingleChildScrollView(
+      reverse: true,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        child: Padding(
+          //acerto teclado
+          padding: mediaQueryData.viewInsets,
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.usuario,
+                    style: const TextStyle(
+                        fontSize: 25, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      HistoricoModel? response = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              const HistoricoPage(),
+                        ),
+                      );
+                      if (response != null) {
+                        setState(() {
+                          _descricaoController.text = response.descricao;
+                        });
+                      }
+                    },
+                    icon: const Icon(
+                      Icons.search,
+                      size: 40,
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  DropdownButton(
+                    value: _formData['grupo'].toString(),
+                    style: const TextStyle(color: Colors.black, fontSize: 16),
+                    onChanged: (String? newValue) {
                       setState(() {
-                        _descricaoController.text = response;
+                        _formData['grupo'] = newValue ?? '';
                       });
-                    }
-                  },
-                  icon: const Icon(
-                    Icons.search,
-                    size: 40,
+                    },
+                    items: constantes.grupos.map((itemone) {
+                      return DropdownMenuItem(
+                          value: itemone, child: Text(itemone));
+                    }).toList(),
                   ),
-                ),
-
-                const SizedBox(
-                  height: 30,
-                ),
-
-                //descrição
-                TextFormField(
-                  controller: _descricaoController,
-                  onSaved: (descricao) =>
-                      _formData['descricao'] = descricao ?? '',
-                  decoration: const InputDecoration(
-                    labelText: 'Descrição',
+                  const SizedBox(
+                    height: 30,
                   ),
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
 
-                //Quantidade
-                TextFormField(
-                  initialValue: _formData['quantidade']?.toString(),
-                  onSaved: (quantidade) =>
-                      _formData['quantidade'] = quantidade ?? '',
-                  decoration: const InputDecoration(
-                    labelText: 'Quantidade',
+                  //descrição
+                  TextFormField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (descricao) {
+                      if (descricao == null || descricao.isEmpty) {
+                        return 'Insira o nome de um produto.';
+                      }
+                      return null;
+                    },
+                    textInputAction: TextInputAction.next,
+                    controller: _descricaoController,
+                    onSaved: (descricao) =>
+                        _formData['descricao'] = descricao ?? '',
+                    decoration: const InputDecoration(
+                      labelText: 'Descrição',
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
+                  const SizedBox(
+                    height: 30,
+                  ),
 
-                //DropDown - Grupo
-                DropdownButton(
-                  value: _formData['grupo'].toString(),
-                  style: const TextStyle(color: Colors.black),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _formData['grupo'] = newValue ?? '';
-                    });
-                  },
-                  items: constantes.grupos.map((itemone) {
-                    return DropdownMenuItem(
-                        value: itemone, child: Text(itemone));
-                  }).toList(),
-                ),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _isLoading
-                        ? const CircularProgressIndicator()
-                        : ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Sair'),
-                          ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Container(
-                              child: const Text('sdfsdfsf'),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                  //Quantidade
+                  TextFormField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (quantidade) {
+                      if (quantidade == null || quantidade.isEmpty) {
+                        return 'Insira uma quantidade.';
+                      }
+                      return null;
+                    },
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (value) async {
+                      if (_formKey.currentState!.validate()) {
                         if (await onSubmitForm() == false) {
+                          _mostraMensagem();
                           print('erro false');
                         } else {
                           print('erro true');
@@ -190,43 +191,61 @@ class _FormPageState extends State<FormPage> {
                           // ignore: use_build_context_synchronously
                           Navigator.of(context).pop();
                         }
-                      },
-                      child: const Text('Salvar'),
+                      }
+                    },
+                    maxLength: 8,
+                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                    initialValue: _formData['quantidade']?.toString(),
+                    onSaved: (quantidade) =>
+                        _formData['quantidade'] = quantidade ?? '',
+                    decoration: const InputDecoration(
+                      labelText: 'Quantidade',
                     ),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
 
-                    /*
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (await onSubmitForm() == false) {
-                          // ignore: use_build_context_synchronously
-                          showDialog<void>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text('Erro !'),
-                        content: const Text('Ocorreu um erro.'),
-                        actions: [
-                          TextButton(
+                  //DropDown - Grupo
+                  
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _isLoading
+                          ? const CircularProgressIndicator()
+                          : TextButton.icon(
+                              icon: const Icon(Icons.exit_to_app),
                               onPressed: () {
-                                setState(() => _isLoading = false);
                                 Navigator.of(context).pop();
                               },
-                              child: const Text('OK'))
-                        ],
+                              label: const Text('Sair'),
+                            ),
+                      TextButton.icon(
+                        icon: const Icon(Icons.save),
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            if (await onSubmitForm() == false) {
+                              _mostraMensagem();
+                              print('erro false');
+                            } else {
+                              print('erro true');
+                              setState(() => _isLoading = false);
+                              // ignore: use_build_context_synchronously
+                              Navigator.of(context).pop();
+                            }
+                          }
+                        },
+                        label: const Text('Salvar'),
                       ),
-                    );
-                          
-                        } else {
-                          setState(() => _isLoading = false);
-                          // ignore: use_build_context_synchronously
-                          Navigator.of(context).pop();
-                        }
-                      },
-                      child: const Text('Salvar'),
-                    ),
-                    */
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                  // Padding(
+                  //   padding: EdgeInsets.only(
+                  //       bottom: MediaQuery.of(context).viewInsets.bottom),
+                  // ),
+                ],
+              ),
             ),
           ),
         ),
@@ -234,3 +253,31 @@ class _FormPageState extends State<FormPage> {
     );
   }
 }
+
+/*
+>> para posicionar acima quando abrir teclado
+1. Scaffold(
+      resizeToAvoidBottomInset: false,
+
+2. body: SingleChildScrollView(
+        reverse: true,
+
+ultimo item da coluna
+
+3. Padding(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom),
+              ),
+
+>> para fechar teclado
+GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+
+>> BCrypt
+
+final aaa = BCrypt.hashpw(_controllerSenha.text, BCrypt.gensalt())
+final result = BCrypt.checkpw(_controllerSenha.text, aaa);
+
+
+*/
+
