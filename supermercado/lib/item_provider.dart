@@ -7,8 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:supermercado/app_data.dart' as app_data;
 
 class ItemProvider with ChangeNotifier {
-  // final _baseUrl = 'http://amilton.com.br/api';
-  final _baseUrl = 'http://192.168.1.81:21276';
+  final _baseUrl = 'http://amilton.com.br/api';
+  // final _baseUrl = 'http://192.168.1.81:21276';
 
   List<String> compras = ['feijão', 'arroz', 'carne moída', 'café'];
   List<ItemModel> items = app_data.items;
@@ -43,14 +43,14 @@ class ItemProvider with ChangeNotifier {
         );
       });
       items.sort((a, b) {
-      // Primeiro, comparar pelo campo nome
-      int comparacao = a.grupo.compareTo(b.grupo);
-      if (comparacao != 0) {
-        return comparacao;
-      }
-      // Se os nomes forem iguais, comparar pelo campo idade
-      return a.descricao.compareTo(b.descricao);
-    });
+        // Primeiro, comparar pelo campo nome
+        int comparacao = a.grupo.compareTo(b.grupo);
+        if (comparacao != 0) {
+          return comparacao;
+        }
+        // Se os nomes forem iguais, comparar pelo campo idade
+        return a.descricao.compareTo(b.descricao);
+      });
     } catch (err) {
       print('');
     }
@@ -109,10 +109,16 @@ class ItemProvider with ChangeNotifier {
     };
 
     try {
-      final response = await http.post(
+      print('dentro do try');
+      final response = await http
+          .post(
         url,
         body: envio,
-      );
+      )
+          .timeout(const Duration(seconds: 2), onTimeout: () {
+        return http.Response('Error', 408);
+      });
+      print('depois do try');
       if (response.statusCode == 200) {
         final id = jsonDecode(response.body)['id'];
         final ItemModel registro = ItemModel(
@@ -134,6 +140,7 @@ class ItemProvider with ChangeNotifier {
         return false;
       }
     } catch (err) {
+      print('dentrop do catch');
       return false;
     }
   }

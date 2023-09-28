@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:supermercado/item_model.dart';
 import 'package:supermercado/item_provider.dart';
 import 'package:supermercado/pages/constantes.dart' as constantes;
@@ -68,7 +69,6 @@ class _FormPageState extends State<FormPage> {
         .saveItem(_formData, widget.usuario);
 
     return response;
-
   }
 
   @override
@@ -174,6 +174,29 @@ class _FormPageState extends State<FormPage> {
                           ),
                     ElevatedButton(
                       onPressed: () async {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Container(
+                              child: const Text('sdfsdfsf'),
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                        if (await onSubmitForm() == false) {
+                          print('erro false');
+                        } else {
+                          print('erro true');
+                          setState(() => _isLoading = false);
+                          // ignore: use_build_context_synchronously
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      child: const Text('Salvar'),
+                    ),
+
+                    /*
+                    ElevatedButton(
+                      onPressed: () async {
                         if (await onSubmitForm() == false) {
                           // ignore: use_build_context_synchronously
                           showDialog<void>(
@@ -200,9 +223,9 @@ class _FormPageState extends State<FormPage> {
                       },
                       child: const Text('Salvar'),
                     ),
+                    */
                   ],
                 ),
-                
               ],
             ),
           ),
