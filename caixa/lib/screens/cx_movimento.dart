@@ -17,6 +17,7 @@ class CxMovimento extends StatefulWidget {
 class _CxMovimentoState extends State<CxMovimento> {
   TextEditingController dataController = TextEditingController();
   String isSwitched = '+';
+  String ccSelected = '';
 
   final formKey = GlobalKey<FormState>();
   final formData = <String, Object>{};
@@ -49,6 +50,10 @@ class _CxMovimentoState extends State<CxMovimento> {
 
   @override
   Widget build(BuildContext context) {
+    if (ccSelected.isEmpty) {
+      ccSelected = centroCustos[0].descricao;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Movimento'),
@@ -147,6 +152,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                           symbol: '',
                         ),
                       ],
+                      onSaved: (valor) => formData['valor'] = valor ?? '',
                     ),
 
                     //Sinal
@@ -155,6 +161,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                         String sig = isSwitched == '+' ? '-' : '+';
                         setState(() {
                           isSwitched = sig;
+                          formData['sinal'] = sig;
                         });
                       },
                       child: Container(
@@ -200,6 +207,8 @@ class _CxMovimentoState extends State<CxMovimento> {
                   minLines: 2,
                   maxLines: 2,
                   inputFormatters: [MaxLinesInputFormatter(2)],
+                  onSaved: (historico) =>
+                      formData['historico'] = historico ?? '',
                 ),
                 const SizedBox(
                   height: 20,
@@ -214,7 +223,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                       width: 20,
                     ),
                     DropdownButton(
-                        value: 'Cota Office',
+                        value: ccSelected,
                         style:
                             const TextStyle(color: Colors.black, fontSize: 16),
                         items: centroCustos.map((itemone) {
@@ -222,7 +231,11 @@ class _CxMovimentoState extends State<CxMovimento> {
                               value: itemone.descricao,
                               child: Text(itemone.descricao));
                         }).toList(),
-                        onChanged: (_) {}),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            ccSelected = newValue!;
+                          });
+                        }),
                   ],
                 ),
                 const SizedBox(
