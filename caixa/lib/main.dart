@@ -1,4 +1,5 @@
 import 'package:caixa/screens/cx_movimento.dart';
+import 'package:caixa/screens/seletor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: const CxMovimento(),
+      home: const Seletor(),
     );
   }
 }
