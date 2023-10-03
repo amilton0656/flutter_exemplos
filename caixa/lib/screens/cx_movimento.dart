@@ -1,4 +1,5 @@
 import 'package:caixa/models/centrocustos_model.dart';
+import 'package:caixa/screens/cx_centro_custos_list.dart';
 import 'package:caixa/utils/validadores.dart';
 import 'package:caixa/widgets/custom_text_field.dart';
 import 'package:caixa/widgets/max_Lines_Input_formatter.dart';
@@ -16,8 +17,9 @@ class CxMovimento extends StatefulWidget {
 
 class _CxMovimentoState extends State<CxMovimento> {
   TextEditingController dataController = TextEditingController();
-  String isSwitched = '+';
   String ccSelected = '';
+
+  bool sinalSeletor = false;
 
   final formKey = GlobalKey<FormState>();
   final formData = <String, Object>{};
@@ -32,9 +34,18 @@ class _CxMovimentoState extends State<CxMovimento> {
     filter: {'#': RegExp(r'[0-9]')},
   );
 
+  void _showModalBottomSheet() {
+    showModalBottomSheet(
+      //acerto teclado
+      isScrollControlled: true,
+      context: context,
+      builder: (_) => CxCentroCustosList(centroCustos: centroCustos),
+    );
+  }
+
   onSubmit() {
     formKey.currentState?.validate();
-    // formKey.currentState?.save();
+    formKey.currentState?.save();
     print(formData);
   }
 
@@ -45,7 +56,7 @@ class _CxMovimentoState extends State<CxMovimento> {
     formData['data'] = '01102023';
     formData['valor'] = '';
     formData['historico'] = '';
-    formData['id_centrocustos'] = 1;
+    formData['id_centrocustos'] = 0;
   }
 
   @override
@@ -54,13 +65,20 @@ class _CxMovimentoState extends State<CxMovimento> {
       ccSelected = centroCustos[0].descricao;
     }
 
+    Color corFundo = sinalSeletor ? Colors.red : Colors.blue;
+    Icon iconBotao = Icon(sinalSeletor ? Icons.remove : Icons.add, size: 30);
+
+    
+
     return Scaffold(
+      // drawer: ,
       appBar: AppBar(
         title: const Text('Movimento'),
       ),
       body: SingleChildScrollView(
         reverse: true,
         child: Container(
+          
           padding: const EdgeInsets.all(15),
           child: Form(
             key: formKey,
@@ -116,7 +134,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                         },
                         icon: const Icon(
                           Icons.calendar_month,
-                          size: 40,
+                          size: 38,
                         ),
                       ),
                     )
@@ -156,31 +174,40 @@ class _CxMovimentoState extends State<CxMovimento> {
                     ),
 
                     //Sinal
+                    const SizedBox(
+                      width: 10,
+                    ),
                     GestureDetector(
                       onTap: () {
-                        String sig = isSwitched == '+' ? '-' : '+';
                         setState(() {
-                          isSwitched = sig;
-                          formData['sinal'] = sig;
+                          sinalSeletor = !sinalSeletor;
+                          formData['sinal'] = sinalSeletor;
                         });
                       },
-                      child: Container(
-                        margin: const EdgeInsets.only(left: 10, top: 2),
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: isSwitched == '+' ? Colors.green : Colors.red,
-                        ),
-                        child: isSwitched == '+'
-                            ? const Icon(
-                                Icons.add,
-                                color: Colors.black,
-                              )
-                            : const Icon(
-                                Icons.remove,
-                                color: Colors.white,
+                      child: Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: corFundo,
+                            ),
+                            height: 36,
+                            width: 70,
+                          ),
+                          Positioned(
+                            left: sinalSeletor ? 34 : 0,
+                            right: sinalSeletor ? 0 : 34,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: Colors.green.shade300,
                               ),
+                              height: 35,
+                              width: 35,
+                              child: iconBotao,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -215,29 +242,59 @@ class _CxMovimentoState extends State<CxMovimento> {
                 ),
 
                 //Centro Custos
-                Row(
-                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Stack(
                   children: [
-                    const Text('Centro de Custos: '),
-                    const SizedBox(
-                      width: 20,
+                    Container(
+                      padding: const EdgeInsets.only(top: 10),
+                      color: Colors.white,
+                      height: 100,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomTextField(
+                            larguraInput: 70,
+                            maxLength: 4,
+                            label: '',
+                            onSaved: (idCentroCustos) =>
+                      formData['id_centrocustos'] = idCentroCustos ?? '',
+                          ),
+                          Container(
+                            width: 350,
+                            padding: const EdgeInsets.only(left: 8, top: 8, bottom: 6),
+                            margin: const EdgeInsets.only(left: 0, bottom: 20),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  width: 1, color: Colors.grey.shade500),
+                              borderRadius: BorderRadius.circular(10),
+                              // color: Colors.grey.shade300,
+                            ),
+                            child: const Text('data'),
+                          ),
+                          IconButton(
+                            padding: EdgeInsets.only(bottom: 5),
+                              onPressed: _showModalBottomSheet,
+                              icon: const Icon(
+                                Icons.search,
+                                size: 30,
+                              ))
+                        ],
+                      ),
                     ),
-                    DropdownButton(
-                        value: ccSelected,
-                        style:
-                            const TextStyle(color: Colors.black, fontSize: 16),
-                        items: centroCustos.map((itemone) {
-                          return DropdownMenuItem(
-                              value: itemone.descricao,
-                              child: Text(itemone.descricao));
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            ccSelected = newValue!;
-                          });
-                        }),
+                    Positioned(
+                      left: 8,
+                      top: 1,
+                      child: Container(
+                          color: Colors.white,
+                          child: const Text(
+                            ' Centro de Custos ',
+                            style: TextStyle(fontSize: 12),
+                          )),
+                    ),
                   ],
                 ),
+
+
                 const SizedBox(
                   height: 20,
                 ),
