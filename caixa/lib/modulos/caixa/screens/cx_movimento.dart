@@ -1,5 +1,9 @@
-import 'package:caixa/models/centrocustos_model.dart';
-import 'package:caixa/screens/cx_centro_custos_list.dart';
+import 'dart:async';
+
+import 'package:caixa/modulos/caixa/models/centrocustos_model.dart';
+import 'package:caixa/modulos/caixa/providers/cx_centro_custos_provider.dart';
+import 'package:caixa/modulos/caixa/screens/cx_centro_custos_list.dart';
+import 'package:caixa/modulos/caixa/screens/cx_movimento_filtro.dart';
 import 'package:caixa/utils/validadores.dart';
 import 'package:caixa/widgets/custom_text_field.dart';
 import 'package:caixa/widgets/max_Lines_Input_formatter.dart';
@@ -7,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
+import 'package:provider/provider.dart';
 
 class CxMovimento extends StatefulWidget {
   const CxMovimento({super.key});
@@ -17,30 +22,59 @@ class CxMovimento extends StatefulWidget {
 
 class _CxMovimentoState extends State<CxMovimento> {
   TextEditingController dataController = TextEditingController();
+  TextEditingController idCentroCustosController = TextEditingController();
   String ccSelected = '';
+  String centroCustosDescricao = '';
+  List<CentroCustosModel> centrosCustos = [];
 
   bool sinalSeletor = false;
 
   final formKey = GlobalKey<FormState>();
   final formData = <String, Object>{};
 
-  final List<CentroCustosModel> centroCustos = [
-    CentroCustosModel(id: 1, descricao: 'Bliss'),
-    CentroCustosModel(id: 1, descricao: 'Cota Office'),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    scheduleMicrotask(() {
+      Provider.of<CentroCustosProvider>(context, listen: false).loadRegistros();
+    });
+  }
 
   final dataFormarter = MaskTextInputFormatter(
     mask: '##/##/####',
     filter: {'#': RegExp(r'[0-9]')},
   );
 
-  void _showModalBottomSheet() {
-    showModalBottomSheet(
+  void _getCentroCustosDescricao(int id) {
+    print('id >>> $id');
+    final cc = centrosCustos.firstWhere((element) => element.id == id);
+    setState(() {
+      centroCustosDescricao = cc.descricao;
+      formData['id_centroCustos'] = cc.id;
+      idCentroCustosController.text = cc.id.toString();
+    });
+  }
+
+  void _buscaCentroCustos() async {
+    final CentroCustosModel? res = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => CxCentroCustosList(),
+      ),
+    );
+    if (res != null) {
+      _getCentroCustosDescricao(res.id);
+    }
+  }
+
+  void _showModalBottomSheet() async {
+    final result = await showModalBottomSheet(
       //acerto teclado
       isScrollControlled: true,
       context: context,
-      builder: (_) => CxCentroCustosList(centroCustos: centroCustos),
+      builder: (_) => const CxCentroCustosList(),
     );
+    print(result.descricao);
+    _getCentroCustosDescricao(result.id);
   }
 
   onSubmit() {
@@ -61,24 +95,34 @@ class _CxMovimentoState extends State<CxMovimento> {
 
   @override
   Widget build(BuildContext context) {
-    if (ccSelected.isEmpty) {
-      ccSelected = centroCustos[0].descricao;
-    }
+    centrosCustos =
+        Provider.of<CentroCustosProvider>(context).getRegistros();
+
+    // if (ccSelected.isEmpty) {
+    //   ccSelected = centrosCustos[0].descricao;
+    // }
 
     Color corFundo = sinalSeletor ? Colors.red : Colors.blue;
     Icon iconBotao = Icon(sinalSeletor ? Icons.remove : Icons.add, size: 30);
-
-    
 
     return Scaffold(
       // drawer: ,
       appBar: AppBar(
         title: const Text('Movimento'),
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (ctx) => CxMovimentoFiltro()));
+            },
+            icon: const Icon(Icons.search),
+            label: const Text('Movimento'),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         reverse: true,
         child: Container(
-          
           padding: const EdgeInsets.all(15),
           child: Form(
             key: formKey,
@@ -111,32 +155,30 @@ class _CxMovimentoState extends State<CxMovimento> {
                       // ],
                       onSaved: (data) => formData['data'] = data ?? '',
                     ),
+                    IconButton(
+                      padding: const EdgeInsets.only(top: 0, bottom: 2),
+                      onPressed: () async {
+                        DateTime? newDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2022),
+                          lastDate: DateTime(2024),
+                        );
+                        String data = newDate.toString();
+
+                        setState(() {
+                          String datax =
+                              '${data.substring(8, 10)}/${data.substring(5, 7)}/${data.substring(0, 4)}';
+                          dataController.text = datax;
+                        });
+                      },
+                      icon: const Icon(
+                        Icons.calendar_month,
+                        size: 38,
+                      ),
+                    ),
                     const SizedBox(
                       width: 5,
-                    ),
-                    Container(
-                      child: IconButton(
-                        padding: const EdgeInsets.only(top: 0, bottom: 2),
-                        onPressed: () async {
-                          DateTime? newDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2022),
-                            lastDate: DateTime(2024),
-                          );
-                          String data = newDate.toString();
-
-                          setState(() {
-                            String datax =
-                                '${data.substring(8, 10)}/${data.substring(5, 7)}/${data.substring(0, 4)}';
-                            dataController.text = datax;
-                          });
-                        },
-                        icon: const Icon(
-                          Icons.calendar_month,
-                          size: 38,
-                        ),
-                      ),
                     )
                   ],
                 ),
@@ -253,15 +295,18 @@ class _CxMovimentoState extends State<CxMovimento> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CustomTextField(
+                            controller: idCentroCustosController,
                             larguraInput: 70,
                             maxLength: 4,
                             label: '',
                             onSaved: (idCentroCustos) =>
-                      formData['id_centrocustos'] = idCentroCustos ?? '',
+                                formData['id_centrocustos'] =
+                                    idCentroCustos ?? '',
                           ),
                           Container(
                             width: 350,
-                            padding: const EdgeInsets.only(left: 8, top: 8, bottom: 6),
+                            padding: const EdgeInsets.only(
+                                left: 8, top: 8, bottom: 6),
                             margin: const EdgeInsets.only(left: 0, bottom: 20),
                             decoration: BoxDecoration(
                               border: Border.all(
@@ -269,11 +314,11 @@ class _CxMovimentoState extends State<CxMovimento> {
                               borderRadius: BorderRadius.circular(10),
                               // color: Colors.grey.shade300,
                             ),
-                            child: const Text('data'),
+                            child: Text(centroCustosDescricao),
                           ),
                           IconButton(
-                            padding: EdgeInsets.only(bottom: 5),
-                              onPressed: _showModalBottomSheet,
+                              padding: const EdgeInsets.only(bottom: 5),
+                              onPressed: _buscaCentroCustos,
                               icon: const Icon(
                                 Icons.search,
                                 size: 30,
@@ -293,7 +338,6 @@ class _CxMovimentoState extends State<CxMovimento> {
                     ),
                   ],
                 ),
-
 
                 const SizedBox(
                   height: 20,
