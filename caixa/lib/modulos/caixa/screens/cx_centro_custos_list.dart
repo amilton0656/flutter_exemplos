@@ -53,7 +53,10 @@ class _CxCentroCustosListState extends State<CxCentroCustosList> {
                 );
               },
               onTap: () {
-                Navigator.of(context).pop(centrosCustos[index]);
+                Navigator.of(context).pop({
+                  "id": centrosCustos[index].id,
+                  "descricao": centrosCustos[index].descricao,
+                  });
               },
               child: Text(centrosCustos[index].descricao),
             ),

@@ -1,9 +1,13 @@
-import 'package:caixa/widgets/custom_cx_centro_custos_field.dart';
+import 'package:caixa/modulos/caixa/providers/cx_centro_custos_provider.dart';
+import 'package:caixa/modulos/caixa/screens/cx_centro_custos_list.dart';
 import 'package:caixa/widgets/custom_date_field.dart';
+import 'package:caixa/widgets/custom_search_field.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CxMovimentoFiltro extends StatefulWidget {
-  const CxMovimentoFiltro({super.key});
+  final Future<dynamic> Function(String) onGetDescricao;
+  const CxMovimentoFiltro({super.key, required this.onGetDescricao});
 
   @override
   State<CxMovimentoFiltro> createState() => _CxMovimentoFiltroState();
@@ -12,9 +16,29 @@ class CxMovimentoFiltro extends StatefulWidget {
 class _CxMovimentoFiltroState extends State<CxMovimentoFiltro> {
   TextEditingController dataInicialController = TextEditingController();
   TextEditingController dataFinalController = TextEditingController();
+  TextEditingController idController = TextEditingController();
+
+  Future<String> getDescricao(String id) async {
+    String descricao = '';
+    descricao = await Provider.of<CentroCustosProvider>(context, listen: false)
+        .getDescricao(id);
+    return descricao;
+  }
 
   @override
   Widget build(BuildContext context) {
+    Future<dynamic> _buscarRegistros() async {
+      final res = await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (ctx) => CxCentroCustosList(),
+        ),
+      );
+      if (res != null) {
+        return res;
+      }
+      return null;
+    }
+
     return Scaffold(
       body: Container(
         padding: const EdgeInsets.all(15),
@@ -25,6 +49,7 @@ class _CxMovimentoFiltroState extends State<CxMovimentoFiltro> {
               children: [
                 //** Data Inicial ********************************************************** */
                 CustomDateField(
+                  // validator: ,
                   label: 'Data Inicial',
                   controller: dataInicialController,
                 ),
@@ -41,7 +66,12 @@ class _CxMovimentoFiltroState extends State<CxMovimentoFiltro> {
             ),
 
             //** Centro Custos ********************************************************** */
-            const CustomCxCentroCustosField(),
+            CustomSearchField(
+              onGetDescricao: widget.onGetDescricao,
+              controller: idController,
+              label: 'Centro de Custos',
+              onBuscar: _buscarRegistros,
+            ),
 
             //************************************************************ */
           ],

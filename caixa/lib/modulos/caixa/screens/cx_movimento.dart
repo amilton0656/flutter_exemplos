@@ -4,7 +4,8 @@ import 'package:caixa/modulos/caixa/models/centrocustos_model.dart';
 import 'package:caixa/modulos/caixa/providers/cx_centro_custos_provider.dart';
 import 'package:caixa/modulos/caixa/screens/cx_centro_custos_list.dart';
 import 'package:caixa/modulos/caixa/screens/cx_movimento_filtro.dart';
-import 'package:caixa/utils/validadores.dart';
+import 'package:caixa/widgets/custom_date_field.dart';
+import 'package:caixa/widgets/custom_search_field.dart';
 import 'package:caixa/widgets/custom_text_field.dart';
 import 'package:caixa/widgets/max_Lines_Input_formatter.dart';
 import 'package:flutter/material.dart';
@@ -45,42 +46,30 @@ class _CxMovimentoState extends State<CxMovimento> {
     filter: {'#': RegExp(r'[0-9]')},
   );
 
-  void _getCentroCustosDescricao(int id) {
-    print('id >>> $id');
-    final cc = centrosCustos.firstWhere((element) => element.id == id);
-    setState(() {
-      centroCustosDescricao = cc.descricao;
-      formData['id_centroCustos'] = cc.id;
-      idCentroCustosController.text = cc.id.toString();
-    });
-  }
-
-  void _buscaCentroCustos() async {
-    final CentroCustosModel? res = await Navigator.of(context).push(
+  Future<dynamic> _buscarRegistros() async {
+    final res = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (ctx) => CxCentroCustosList(),
       ),
     );
     if (res != null) {
-      _getCentroCustosDescricao(res.id);
+      return res;
     }
+    return null;
   }
 
-  void _showModalBottomSheet() async {
-    final result = await showModalBottomSheet(
-      //acerto teclado
-      isScrollControlled: true,
-      context: context,
-      builder: (_) => const CxCentroCustosList(),
-    );
-    print(result.descricao);
-    _getCentroCustosDescricao(result.id);
+  Future<dynamic> getDescricao(String id) async {
+    dynamic descricao = '';
+    descricao = await Provider.of<CentroCustosProvider>(context, listen: false)
+        .getDescricao(id);
+    return descricao;
   }
 
   onSubmit() {
-    formKey.currentState?.validate();
-    formKey.currentState?.save();
-    print(formData);
+    if (formKey.currentState!.validate()) {
+      formKey.currentState?.save();
+      print(formData);
+    }
   }
 
   @override
@@ -95,25 +84,21 @@ class _CxMovimentoState extends State<CxMovimento> {
 
   @override
   Widget build(BuildContext context) {
-    centrosCustos =
-        Provider.of<CentroCustosProvider>(context).getRegistros();
-
-    // if (ccSelected.isEmpty) {
-    //   ccSelected = centrosCustos[0].descricao;
-    // }
+    centrosCustos = Provider.of<CentroCustosProvider>(context).getRegistros();
 
     Color corFundo = sinalSeletor ? Colors.red : Colors.blue;
     Icon iconBotao = Icon(sinalSeletor ? Icons.remove : Icons.add, size: 30);
 
     return Scaffold(
-      // drawer: ,
       appBar: AppBar(
         title: const Text('Movimento'),
         actions: [
           TextButton.icon(
             onPressed: () {
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (ctx) => CxMovimentoFiltro()));
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (ctx) => CxMovimentoFiltro(
+                        onGetDescricao: getDescricao,
+                      )));
             },
             icon: const Icon(Icons.search),
             label: const Text('Movimento'),
@@ -129,75 +114,29 @@ class _CxMovimentoState extends State<CxMovimento> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                //Data
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomTextField(
-                      controller: dataController,
-                      larguraInput: 150,
-                      label: 'Data',
-                      validator: (data) {
-                        if (data == null || data.isEmpty) {
-                          return 'Insira uma data.';
-                        }
-
-                        if (!Validadores.isValidDate(data)) {
-                          return 'Data Inválida.';
-                        }
-
-                        return null;
-                      },
-                      inputFormatters: [dataFormarter],
-                      // [
-                      //   MaskTextInputFormatter(
-                      //       mask: "##/##/####", initialText: dataController.text),
-                      // ],
-                      onSaved: (data) => formData['data'] = data ?? '',
-                    ),
-                    IconButton(
-                      padding: const EdgeInsets.only(top: 0, bottom: 2),
-                      onPressed: () async {
-                        DateTime? newDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2022),
-                          lastDate: DateTime(2024),
-                        );
-                        String data = newDate.toString();
-
-                        setState(() {
-                          String datax =
-                              '${data.substring(8, 10)}/${data.substring(5, 7)}/${data.substring(0, 4)}';
-                          dataController.text = datax;
-                        });
-                      },
-                      icon: const Icon(
-                        Icons.calendar_month,
-                        size: 38,
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 5,
-                    )
-                  ],
+                /** Data ******************************************************* */
+                CustomDateField(
+                  label: 'Data Inicial',
+                  controller: dataController,
                 ),
                 const SizedBox(
                   height: 20,
                 ),
 
-                //Valor
+                /** Linha - Valor e Sinal ******************************************************* */
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    /** Valor ******************************************************* */
                     CustomTextField(
                       validator: (valor) {
                         if (valor == null || valor.isEmpty) {
-                          return 'Insira uma valor.';
+                          return 'Insira um valor.';
                         }
 
-                        if (!Validadores.isValidDate(valor)) {
-                          return 'valor Inválida.';
+                        int val = int.tryParse(valor) ?? 0;
+                        if (!(val > 0)) {
+                          return 'Valor inválido.';
                         }
 
                         return null;
@@ -215,7 +154,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                       onSaved: (valor) => formData['valor'] = valor ?? '',
                     ),
 
-                    //Sinal
+                    /** Sinal ******************************************************* */
                     const SizedBox(
                       width: 10,
                     ),
@@ -258,15 +197,11 @@ class _CxMovimentoState extends State<CxMovimento> {
                   height: 20,
                 ),
 
-                //Historico
+                /** Histórico ******************************************************* */
                 CustomTextField(
                   validator: (historico) {
                     if (historico == null || historico.isEmpty) {
-                      return 'Insira uma historico.';
-                    }
-
-                    if (!Validadores.isValidDate(historico)) {
-                      return 'historico Inválida.';
+                      return 'Insira um historico.';
                     }
 
                     return null;
@@ -283,67 +218,21 @@ class _CxMovimentoState extends State<CxMovimento> {
                   height: 20,
                 ),
 
-                //Centro Custos
-                Stack(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.only(top: 10),
-                      color: Colors.white,
-                      height: 100,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CustomTextField(
-                            controller: idCentroCustosController,
-                            larguraInput: 70,
-                            maxLength: 4,
-                            label: '',
-                            onSaved: (idCentroCustos) =>
-                                formData['id_centrocustos'] =
-                                    idCentroCustos ?? '',
-                          ),
-                          Container(
-                            width: 350,
-                            padding: const EdgeInsets.only(
-                                left: 8, top: 8, bottom: 6),
-                            margin: const EdgeInsets.only(left: 0, bottom: 20),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                  width: 1, color: Colors.grey.shade500),
-                              borderRadius: BorderRadius.circular(10),
-                              // color: Colors.grey.shade300,
-                            ),
-                            child: Text(centroCustosDescricao),
-                          ),
-                          IconButton(
-                              padding: const EdgeInsets.only(bottom: 5),
-                              onPressed: _buscaCentroCustos,
-                              icon: const Icon(
-                                Icons.search,
-                                size: 30,
-                              ))
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      left: 8,
-                      top: 1,
-                      child: Container(
-                          color: Colors.white,
-                          child: const Text(
-                            ' Centro de Custos ',
-                            style: TextStyle(fontSize: 12),
-                          )),
-                    ),
-                  ],
+                //** Centro Custos ********************************************************** */
+                CustomSearchField(
+                  onGetDescricao: getDescricao,
+                  controller: idCentroCustosController,
+                  label: 'Centro de Custos',
+                  onBuscar: _buscarRegistros,
+                  onSaved: (idCentroCustos) =>
+                      formData['id_centrocustos'] = idCentroCustos ?? '',
                 ),
 
                 const SizedBox(
                   height: 20,
                 ),
 
-                //botao salvar
+                /** botao salvar ******************************************************* */
                 const SizedBox(
                   height: 20,
                 ),

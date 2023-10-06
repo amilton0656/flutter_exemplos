@@ -42,6 +42,7 @@ dependencies:
   intl: any
   provider: ^6.0.5
   http: ^1.1.0
+  all_validations_br: ^3.0.0
 
 dev_dependencies:
   flutter_test:

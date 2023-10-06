@@ -7,11 +7,13 @@ import 'package:caixa/utils/validadores.dart';
 class CustomDateField extends StatefulWidget {
   final String label;
   final TextEditingController controller;
+  final String? Function(String?)? validator;
 
   const CustomDateField({
     super.key,
     required this.label,
     required this.controller,
+    this.validator,
   });
 
   @override

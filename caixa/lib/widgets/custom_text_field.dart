@@ -17,6 +17,7 @@ class CustomTextField extends StatefulWidget {
   final int? maxLines;
   final int? maxLength;
   final double? larguraInput;
+  final FocusNode? focusNode;
 
   const CustomTextField(
       {Key? key,
@@ -34,7 +35,8 @@ class CustomTextField extends StatefulWidget {
       this.minLines,
       this.maxLines,
       this.maxLength,
-      this.larguraInput})
+      this.larguraInput,
+      this.focusNode})
       : super(key: key);
 
   @override
@@ -57,6 +59,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       width: widget.larguraInput ?? double.infinity,
       padding: const EdgeInsets.only(bottom: 18),
       child: TextFormField(
+        focusNode: widget.focusNode,
         onSaved: widget.onSaved,
         onChanged: widget.onChanged,
         onFieldSubmitted: widget.onFieldSubmitted,

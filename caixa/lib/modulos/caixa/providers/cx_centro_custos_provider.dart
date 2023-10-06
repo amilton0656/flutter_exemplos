@@ -10,6 +10,45 @@ class CentroCustosProvider with ChangeNotifier {
   // final _baseUrl = 'http://192.168.1.81:21276';
 
   List<CentroCustosModel> centrosCustos = [];
+  CentroCustosModel? centroCustos;
+
+  Future<CentroCustosModel?> getRegistroById(String id) async {
+    // CentroCustosModel centroCustos;
+    final url = Uri.parse('$_baseUrl/centrocustos/id/$id');
+
+    try {
+      final response = await http.get(url);
+      print(response.body);
+
+      final data = jsonDecode(response.body);
+
+      centroCustos = CentroCustosModel(
+        id: data['id'],
+        descricao: data['descricao'] ?? '',
+      );
+      notifyListeners();
+      return centroCustos;
+    } catch (err) {
+      print('');
+      return null;
+    }
+
+  }
+
+  Future<dynamic> getDescricao(String id) async {
+    final url = Uri.parse('$_baseUrl/centrocustos/id/$id');
+
+    try {
+      final response = await http.get(url);
+
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (err) {
+      print('');
+      return null;
+    }
+
+  }
 
   void loadRegistros() async {
     centrosCustos = [];
@@ -17,7 +56,6 @@ class CentroCustosProvider with ChangeNotifier {
 
     try {
       final response = await http.get(url);
-      // print(response.body);
 
       final data = jsonDecode(response.body);
 
