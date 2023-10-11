@@ -6,14 +6,18 @@ import 'package:caixa/utils/validadores.dart';
 
 class CustomDateField extends StatefulWidget {
   final String label;
+  final bool dateLarguraMenor;
   final TextEditingController controller;
   final String? Function(String?)? validator;
+  final String? Function(String?)? onSaved;
 
   const CustomDateField({
     super.key,
     required this.label,
     required this.controller,
     this.validator,
+    this.dateLarguraMenor = false,
+    this.onSaved,
   });
 
   @override
@@ -25,15 +29,17 @@ class _CustomDateFieldState extends State<CustomDateField> {
 
   @override
   Widget build(BuildContext context) {
+    double larguraScreen = MediaQuery.of(context).size.width;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         //Data Inicial
         CustomTextField(
           controller: widget.controller,
-          larguraInput: 150,
+          larguraInput: larguraScreen < 500 && widget.dateLarguraMenor ? 120 : 150,
           label: widget.label,
-          validator: (data) {
+          onSaved: widget.onSaved,
+          validator: widget.validator ?? (data) {
             if (data == null || data.isEmpty) {
               return 'Insira uma data.';
             }
@@ -63,7 +69,7 @@ class _CustomDateFieldState extends State<CustomDateField> {
             setState(() {
               String datax =
                   '${data.substring(8, 10)}/${data.substring(5, 7)}/${data.substring(0, 4)}';
-              dataController.text = datax;
+              widget.controller.text = datax;
             });
           },
           icon: const Icon(

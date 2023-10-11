@@ -17,14 +17,15 @@ class _CxCentroCustosListState extends State<CxCentroCustosList> {
   void initState() {
     super.initState();
     scheduleMicrotask(() {
-      Provider.of<CentroCustosProvider>(context, listen: false).loadRegistros();
+      Provider.of<CxCentroCustosProvider>(context, listen: false)
+          .loadRegistros();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final centrosCustos =
-        Provider.of<CentroCustosProvider>(context).getRegistros();
+        Provider.of<CxCentroCustosProvider>(context).getRegistros();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Centros de Custos'),
@@ -56,7 +57,7 @@ class _CxCentroCustosListState extends State<CxCentroCustosList> {
                 Navigator.of(context).pop({
                   "id": centrosCustos[index].id,
                   "descricao": centrosCustos[index].descricao,
-                  });
+                });
               },
               child: Text(centrosCustos[index].descricao),
             ),

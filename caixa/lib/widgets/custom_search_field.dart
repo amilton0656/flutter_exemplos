@@ -24,8 +24,8 @@ class CustomSearchField extends StatefulWidget {
 }
 
 class _CustomSearchFieldState extends State<CustomSearchField> {
-  String descricao = '';
   FocusNode focusNode = FocusNode();
+  TextEditingController descricaoController = TextEditingController();
 
   @override
   void initState() {
@@ -37,11 +37,11 @@ class _CustomSearchFieldState extends State<CustomSearchField> {
           if (value == null) {
             widget.controller!.text = '';
             setState(() {
-              descricao = '';
+              descricaoController.text = '';
             });
           } else {
             setState(() {
-              descricao = value['descricao'].toString();
+              descricaoController.text = value['descricao'].toString();
             });
           }
         });
@@ -59,7 +59,6 @@ class _CustomSearchFieldState extends State<CustomSearchField> {
 
   void _getDescricao(int id, String descri) {
     setState(() {
-      descricao = descri;
       widget.controller!.text = id.toString();
     });
   }
@@ -84,32 +83,50 @@ class _CustomSearchFieldState extends State<CustomSearchField> {
                 maxLength: 4,
                 label: '',
                 onSaved: widget.onSaved,
-                validator: (id) {
-                        if (id == null || id.isEmpty) {
-                          return 'Insira um valor.';
-                        }
+                // validator: (id) {
+                //   if (id == null || id.isEmpty) {
+                //     return 'Insira um valor.';
+                //   }
 
-                        int val = int.tryParse(id) ?? 0;
-                        if (!(val > 0)) {
-                          return 'Valor inválido.';
-                        }
+                //   int val = int.tryParse(id) ?? 0;
+                //   if (!(val > 0)) {
+                //     return 'Valor inválido.';
+                //   }
 
-                        return null;
-                      },
+                //   return null;
+                // },
               ),
 
               /** Display ******************************************************** */
-              Container(
-                width: 350,
-                padding: const EdgeInsets.only(left: 8, top: 8, bottom: 6),
-                margin: const EdgeInsets.only(left: 0, bottom: 20),
-                decoration: BoxDecoration(
-                  border: Border.all(width: 1, color: Colors.grey.shade500),
-                  borderRadius: BorderRadius.circular(10),
-                  // color: Colors.grey.shade300,
+              Expanded(
+                child: CustomTextField(
+                  label: '',
+                  controller: descricaoController,
+                  readOnly: true,
+                  // larguraInput: 300,
+                  validator: (value) {
+                    if (widget.controller == null) {
+                      return 'Insira um valor.';
+                    }
+                    if (widget.controller!.text.isEmpty) {
+                      return 'Insira uma informação válida.';
+                    }
+                
+                    return null;
+                  },
                 ),
-                child: Text(descricao),
               ),
+              // Container(
+              //   width: 350,
+              //   padding: const EdgeInsets.only(left: 8, top: 8, bottom: 6),
+              //   margin: const EdgeInsets.only(left: 0, bottom: 20),
+              //   decoration: BoxDecoration(
+              //     border: Border.all(width: 1, color: Colors.grey.shade500),
+              //     borderRadius: BorderRadius.circular(10),
+              //     // color: Colors.grey.shade300,
+              //   ),
+              //   child: Text(descricao),
+              // ),
 
               /** Search icon ******************************************************** */
               IconButton(

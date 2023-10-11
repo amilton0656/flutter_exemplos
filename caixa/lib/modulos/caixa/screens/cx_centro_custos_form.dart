@@ -1,11 +1,11 @@
-import 'package:caixa/modulos/caixa/models/centrocustos_model.dart';
+import 'package:caixa/modulos/caixa/models/cx_centrocustos_model.dart';
 import 'package:caixa/modulos/caixa/providers/cx_centro_custos_provider.dart';
 import 'package:caixa/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CxCentroCustosForm extends StatefulWidget {
-  final CentroCustosModel? centroCusto;
+  final CxCentroCustosModel? centroCusto;
   const CxCentroCustosForm({
     super.key,
     this.centroCusto,
@@ -25,7 +25,7 @@ class _CxCentroCustosFormState extends State<CxCentroCustosForm> {
       _formKey.currentState?.save();
       setState(() => isLoading = true);
       final response =
-          await Provider.of<CentroCustosProvider>(context, listen: false)
+          await Provider.of<CxCentroCustosProvider>(context, listen: false)
               .saveRegistro(_formData);
       setState(() => isLoading = false);
       if (response) {
@@ -35,7 +35,7 @@ class _CxCentroCustosFormState extends State<CxCentroCustosForm> {
     }
   }
 
-   @override
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
@@ -43,7 +43,7 @@ class _CxCentroCustosFormState extends State<CxCentroCustosForm> {
       // final arg = ModalRoute.of(context)?.settings.arguments;
 
       if (widget.centroCusto != null) {
-        final centroCusto = widget.centroCusto as CentroCustosModel;
+        final centroCusto = widget.centroCusto as CxCentroCustosModel;
 
         _formData['id'] = centroCusto.id;
         _formData['descricao'] = centroCusto.descricao;

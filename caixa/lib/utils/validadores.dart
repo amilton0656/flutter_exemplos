@@ -17,12 +17,38 @@ class Validadores {
         (mes == 9 && dia > 30) ||
         (mes == 11 && dia > 30) ||
         (!anoBisexto && mes == 2 && dia > 28) ||
-        (anoBisexto && mes == 2 && dia > 29)
-        ) {
+        (anoBisexto && mes == 2 && dia > 29)) {
       return false;
     }
 
-
     return res;
+  }
+
+  static bool dateIsAfter(String data1, String data2) {
+    DateTime dt1 = DateTime.parse(inverteDate(data1));
+    DateTime dt2 = DateTime.parse(inverteDate(data2));
+    return (dt1.compareTo(dt2) <= 0);
+  }
+
+  static String inverteDate(String date) {
+    return '${date.substring(6, 10)}-${date.substring(3, 5)}-${date.substring(0, 2)}';
+  }
+
+  static String dateStringToBanco(String date) {
+    return '${date.substring(6, 10)}-${date.substring(3, 5)}-${date.substring(0, 2)}';
+  }
+
+  static String dateBancoToString(String date) {
+    return '${date.substring(0, 2)}-${date.substring(3, 5)}-${date.substring(6, 10)}';
+  }
+
+  static double StringToDouble(String value) {
+    String valor = value.replaceAll('.', '').replaceAll(',', '.');
+    return double.tryParse(valor) ?? 0;
+  }
+
+  static int StringToInt(String value) {
+    String valor = value.replaceAll('.', '');
+    return int.tryParse(valor) ?? 0;
   }
 }

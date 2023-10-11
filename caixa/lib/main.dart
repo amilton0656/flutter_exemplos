@@ -1,4 +1,5 @@
 import 'package:caixa/modulos/caixa/providers/cx_centro_custos_provider.dart';
+import 'package:caixa/modulos/caixa/providers/cx_movimento_provider.dart';
 import 'package:caixa/modulos/caixa/screens/cx_movimento.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -16,7 +17,10 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => CentroCustosProvider(),
+          create: (_) => CxCentroCustosProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CxMovimentoProvider(),
         ),
       ],
       child: MaterialApp(

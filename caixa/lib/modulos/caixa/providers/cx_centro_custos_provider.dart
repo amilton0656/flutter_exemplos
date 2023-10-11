@@ -3,17 +3,17 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:caixa/modulos/caixa/models/centrocustos_model.dart';
+import 'package:caixa/modulos/caixa/models/cx_centrocustos_model.dart';
 
-class CentroCustosProvider with ChangeNotifier {
+class CxCentroCustosProvider with ChangeNotifier {
   final _baseUrl = 'http://amilton.com.br/api';
   // final _baseUrl = 'http://192.168.1.81:21276';
 
-  List<CentroCustosModel> centrosCustos = [];
-  CentroCustosModel? centroCustos;
+  List<CxCentroCustosModel> centrosCustos = [];
+  CxCentroCustosModel? centroCustos;
 
-  Future<CentroCustosModel?> getRegistroById(String id) async {
-    // CentroCustosModel centroCustos;
+  Future<CxCentroCustosModel?> getRegistroById(String id) async {
+    // CxCentroCustosModel centroCustos;
     final url = Uri.parse('$_baseUrl/centrocustos/id/$id');
 
     try {
@@ -22,7 +22,7 @@ class CentroCustosProvider with ChangeNotifier {
 
       final data = jsonDecode(response.body);
 
-      centroCustos = CentroCustosModel(
+      centroCustos = CxCentroCustosModel(
         id: data['id'],
         descricao: data['descricao'] ?? '',
       );
@@ -32,7 +32,6 @@ class CentroCustosProvider with ChangeNotifier {
       print('');
       return null;
     }
-
   }
 
   Future<dynamic> getDescricao(String id) async {
@@ -47,7 +46,6 @@ class CentroCustosProvider with ChangeNotifier {
       print('');
       return null;
     }
-
   }
 
   void loadRegistros() async {
@@ -61,7 +59,7 @@ class CentroCustosProvider with ChangeNotifier {
 
       data.forEach((itemData) {
         centrosCustos.add(
-          CentroCustosModel(
+          CxCentroCustosModel(
             id: itemData['id'],
             descricao: itemData['descricao'] ?? '',
           ),
@@ -78,14 +76,14 @@ class CentroCustosProvider with ChangeNotifier {
     // return centrosCustos;
   }
 
-  List<CentroCustosModel> getRegistros() {
+  List<CxCentroCustosModel> getRegistros() {
     return centrosCustos;
   }
 
   Future<bool> saveRegistro(Map<String, Object> registro) {
     var hasId = registro['id'] != null;
 
-    final CentroCustosModel centroCustos = CentroCustosModel(
+    final CxCentroCustosModel centroCustos = CxCentroCustosModel(
       id: hasId ? registro['id'] as int : Random().nextInt(5000),
       descricao: registro['descricao'] as String,
     );
@@ -97,7 +95,7 @@ class CentroCustosProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> addRegistro(CentroCustosModel centroCustos) async {
+  Future<bool> addRegistro(CxCentroCustosModel centroCustos) async {
     final url = Uri.parse('$_baseUrl/centrocustos');
 
     final envio = {
@@ -115,7 +113,7 @@ class CentroCustosProvider with ChangeNotifier {
       });
       if (response.statusCode == 200) {
         final id = jsonDecode(response.body)['id'];
-        final CentroCustosModel registro = CentroCustosModel(
+        final CxCentroCustosModel registro = CxCentroCustosModel(
           id: id,
           descricao: centroCustos.descricao,
         );
@@ -130,7 +128,7 @@ class CentroCustosProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> updateRegistro(CentroCustosModel centroCustos) async {
+  Future<bool> updateRegistro(CxCentroCustosModel centroCustos) async {
     final index =
         centrosCustos.indexWhere((element) => element.id == centroCustos.id);
 

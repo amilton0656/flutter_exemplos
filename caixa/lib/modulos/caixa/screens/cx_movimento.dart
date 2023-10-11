@@ -1,9 +1,11 @@
 import 'dart:async';
 
-import 'package:caixa/modulos/caixa/models/centrocustos_model.dart';
+import 'package:caixa/modulos/caixa/models/cx_centrocustos_model.dart';
 import 'package:caixa/modulos/caixa/providers/cx_centro_custos_provider.dart';
+import 'package:caixa/modulos/caixa/providers/cx_movimento_provider.dart';
 import 'package:caixa/modulos/caixa/screens/cx_centro_custos_list.dart';
 import 'package:caixa/modulos/caixa/screens/cx_movimento_filtro.dart';
+import 'package:caixa/utils/validadores.dart';
 import 'package:caixa/widgets/custom_date_field.dart';
 import 'package:caixa/widgets/custom_search_field.dart';
 import 'package:caixa/widgets/custom_text_field.dart';
@@ -26,18 +28,20 @@ class _CxMovimentoState extends State<CxMovimento> {
   TextEditingController idCentroCustosController = TextEditingController();
   String ccSelected = '';
   String centroCustosDescricao = '';
-  List<CentroCustosModel> centrosCustos = [];
+  List<CxCentroCustosModel> centrosCustos = [];
 
   bool sinalSeletor = false;
+  bool isLoading = false;
 
-  final formKey = GlobalKey<FormState>();
-  final formData = <String, Object>{};
+  final _formKey = GlobalKey<FormState>();
+  final _formData = <String, Object>{};
 
   @override
   void initState() {
     super.initState();
     scheduleMicrotask(() {
-      Provider.of<CentroCustosProvider>(context, listen: false).loadRegistros();
+      Provider.of<CxCentroCustosProvider>(context, listen: false)
+          .loadRegistros();
     });
   }
 
@@ -49,7 +53,7 @@ class _CxMovimentoState extends State<CxMovimento> {
   Future<dynamic> _buscarRegistros() async {
     final res = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (ctx) => CxCentroCustosList(),
+        builder: (ctx) => const CxCentroCustosList(),
       ),
     );
     if (res != null) {
@@ -60,32 +64,43 @@ class _CxMovimentoState extends State<CxMovimento> {
 
   Future<dynamic> getDescricao(String id) async {
     dynamic descricao = '';
-    descricao = await Provider.of<CentroCustosProvider>(context, listen: false)
-        .getDescricao(id);
+    descricao =
+        await Provider.of<CxCentroCustosProvider>(context, listen: false)
+            .getDescricao(id);
     return descricao;
   }
 
-  onSubmit() {
-    if (formKey.currentState!.validate()) {
-      formKey.currentState?.save();
-      print(formData);
+  void _onSubmit() async {
+    if (_formKey.currentState?.validate() != null) {
+      _formKey.currentState?.save();
+      _formData['sinal'] = sinalSeletor ? '+' : '-';
+      print(_formData);
+      setState(() => isLoading = true);
+      final response =
+          await Provider.of<CxMovimentoProvider>(context, listen: false)
+              .saveRegistro(_formData);
+      setState(() => isLoading = false);
+      // if (response) {
+      //   if (!context.mounted) return;
+      //   Navigator.of(context).pop();
+      // }
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    formData['id'] = 0;
-    formData['data'] = '01102023';
-    formData['valor'] = '';
-    formData['historico'] = '';
-    formData['id_centrocustos'] = 0;
+    _formData['id'] = 0;
+    _formData['data'] = '';
+    _formData['valor'] = '';
+    _formData['historico'] = '';
+    _formData['id_centrocustos'] = 0;
   }
 
   @override
   Widget build(BuildContext context) {
-    centrosCustos = Provider.of<CentroCustosProvider>(context).getRegistros();
-
+    centrosCustos = Provider.of<CxCentroCustosProvider>(context).getRegistros();
+    double larguraScreen = MediaQuery.of(context).size.width;
     Color corFundo = sinalSeletor ? Colors.red : Colors.blue;
     Icon iconBotao = Icon(sinalSeletor ? Icons.remove : Icons.add, size: 30);
 
@@ -108,9 +123,10 @@ class _CxMovimentoState extends State<CxMovimento> {
       body: SingleChildScrollView(
         reverse: true,
         child: Container(
+          width: larguraScreen > 500 ? 500 : larguraScreen,
           padding: const EdgeInsets.all(15),
           child: Form(
-            key: formKey,
+            key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -118,6 +134,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                 CustomDateField(
                   label: 'Data Inicial',
                   controller: dataController,
+                  onSaved: (data) => _formData['data'] = data ?? '',
                 ),
                 const SizedBox(
                   height: 20,
@@ -134,7 +151,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                           return 'Insira um valor.';
                         }
 
-                        int val = int.tryParse(valor) ?? 0;
+                        double val = Validadores.StringToDouble(valor);
                         if (!(val > 0)) {
                           return 'Valor inválido.';
                         }
@@ -151,7 +168,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                           symbol: '',
                         ),
                       ],
-                      onSaved: (valor) => formData['valor'] = valor ?? '',
+                      onSaved: (valor) => _formData['valor'] = valor ?? '',
                     ),
 
                     /** Sinal ******************************************************* */
@@ -162,7 +179,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                       onTap: () {
                         setState(() {
                           sinalSeletor = !sinalSeletor;
-                          formData['sinal'] = sinalSeletor;
+                          _formData['sinal'] = sinalSeletor;
                         });
                       },
                       child: Stack(
@@ -212,7 +229,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                   maxLines: 2,
                   inputFormatters: [MaxLinesInputFormatter(2)],
                   onSaved: (historico) =>
-                      formData['historico'] = historico ?? '',
+                      _formData['historico'] = historico ?? '',
                 ),
                 const SizedBox(
                   height: 20,
@@ -225,7 +242,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                   label: 'Centro de Custos',
                   onBuscar: _buscarRegistros,
                   onSaved: (idCentroCustos) =>
-                      formData['id_centrocustos'] = idCentroCustos ?? '',
+                      _formData['id_centrocustos'] = idCentroCustos ?? '',
                 ),
 
                 const SizedBox(
@@ -239,7 +256,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: onSubmit,
+                    onPressed: _onSubmit,
                     child: const Text('Salvar'),
                   ),
                 ),
