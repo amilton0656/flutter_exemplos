@@ -1,6 +1,6 @@
 import 'package:caixa/modulos/caixa/providers/cx_centro_custos_provider.dart';
 import 'package:caixa/modulos/caixa/providers/cx_movimento_provider.dart';
-import 'package:caixa/modulos/caixa/screens/cx_movimento.dart';
+import 'package:caixa/modulos/caixa/screens/cx_movimento_periodo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         debugShowCheckedModeBanner: false,
-        home: const CxMovimento(),
+        home: const CxMovimentoPeriodo(),
       ),
     );
   }

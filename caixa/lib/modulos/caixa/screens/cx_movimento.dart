@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:caixa/modulos/caixa/models/cx_centrocustos_model.dart';
+import 'package:caixa/modulos/caixa/models/cx_movimento_model.dart';
 import 'package:caixa/modulos/caixa/providers/cx_centro_custos_provider.dart';
 import 'package:caixa/modulos/caixa/providers/cx_movimento_provider.dart';
 import 'package:caixa/modulos/caixa/screens/cx_centro_custos_list.dart';
-import 'package:caixa/modulos/caixa/screens/cx_movimento_filtro.dart';
+import 'package:caixa/utils/formatadores.dart';
 import 'package:caixa/utils/validadores.dart';
 import 'package:caixa/widgets/custom_date_field.dart';
 import 'package:caixa/widgets/custom_search_field.dart';
@@ -17,7 +18,8 @@ import 'package:currency_text_input_formatter/currency_text_input_formatter.dart
 import 'package:provider/provider.dart';
 
 class CxMovimento extends StatefulWidget {
-  const CxMovimento({super.key});
+  final CxMovimentoModel? cxLancamento;
+  const CxMovimento({super.key, this.cxLancamento});
 
   @override
   State<CxMovimento> createState() => _CxMovimentoState();
@@ -25,7 +27,10 @@ class CxMovimento extends StatefulWidget {
 
 class _CxMovimentoState extends State<CxMovimento> {
   TextEditingController dataController = TextEditingController();
+  TextEditingController valorController = TextEditingController();
+  TextEditingController historicoController = TextEditingController();
   TextEditingController idCentroCustosController = TextEditingController();
+  TextEditingController descricaoController = TextEditingController();
   String ccSelected = '';
   String centroCustosDescricao = '';
   List<CxCentroCustosModel> centrosCustos = [];
@@ -80,6 +85,7 @@ class _CxMovimentoState extends State<CxMovimento> {
           await Provider.of<CxMovimentoProvider>(context, listen: false)
               .saveRegistro(_formData);
       setState(() => isLoading = false);
+      print(response);
       // if (response) {
       //   if (!context.mounted) return;
       //   Navigator.of(context).pop();
@@ -88,21 +94,45 @@ class _CxMovimentoState extends State<CxMovimento> {
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
-    _formData['id'] = 0;
-    _formData['data'] = '';
-    _formData['valor'] = '';
-    _formData['historico'] = '';
-    _formData['id_centrocustos'] = 0;
+
+    if (_formData.isEmpty) {
+      if (widget.cxLancamento != null) {
+        final item = widget.cxLancamento as CxMovimentoModel;
+        final desc =await getDescricao(item.id_centrocustos.toString());
+        setState(() {
+          _formData['id'] = item.id;
+          _formData['data'] = item.data;
+          _formData['valor'] = Formatadores.numberToFormatted(item.valor);
+          _formData['sinal'] = item.sinal;
+          _formData['historico'] = item.historico;
+          _formData['id_centrocustos'] = item.id_centrocustos;
+          dataController.text = item.data;
+          valorController.text = Formatadores.numberToFormatted(item.valor);
+          sinalSeletor = item.sinal == "+" ? true : false;
+          historicoController.text = item.historico;
+          idCentroCustosController.text = item.id_centrocustos.toString();
+          descricaoController.text = desc['descricao'].toString();
+        });
+
+        print(_formData);
+      } else {
+        _formData['id'] = 0;
+        _formData['data'] = '';
+        _formData['valor'] = '';
+        _formData['historico'] = '';
+        _formData['id_centrocustos'] = 0;
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     centrosCustos = Provider.of<CxCentroCustosProvider>(context).getRegistros();
     double larguraScreen = MediaQuery.of(context).size.width;
-    Color corFundo = sinalSeletor ? Colors.red : Colors.blue;
-    Icon iconBotao = Icon(sinalSeletor ? Icons.remove : Icons.add, size: 30);
+    Color corFundo = sinalSeletor ? Colors.blue : Colors.red;
+    Icon iconBotao = Icon(sinalSeletor ? Icons.add : Icons.remove, size: 30);
 
     return Scaffold(
       appBar: AppBar(
@@ -110,10 +140,10 @@ class _CxMovimentoState extends State<CxMovimento> {
         actions: [
           TextButton.icon(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (ctx) => CxMovimentoFiltro(
-                        onGetDescricao: getDescricao,
-                      )));
+              // Navigator.of(context).push(MaterialPageRoute(
+              //     builder: (ctx) => CxMovimentoFiltro(
+              //           onGetDescricao: getDescricao,
+              //         )));
             },
             icon: const Icon(Icons.search),
             label: const Text('Movimento'),
@@ -146,6 +176,7 @@ class _CxMovimentoState extends State<CxMovimento> {
                   children: [
                     /** Valor ******************************************************* */
                     CustomTextField(
+                      controller: valorController,
                       validator: (valor) {
                         if (valor == null || valor.isEmpty) {
                           return 'Insira um valor.';
@@ -193,8 +224,8 @@ class _CxMovimentoState extends State<CxMovimento> {
                             width: 70,
                           ),
                           Positioned(
-                            left: sinalSeletor ? 34 : 0,
-                            right: sinalSeletor ? 0 : 34,
+                            right: sinalSeletor ? 34 : 0,
+                            left: sinalSeletor ? 0 : 34,
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(50),
@@ -216,6 +247,7 @@ class _CxMovimentoState extends State<CxMovimento> {
 
                 /** Histórico ******************************************************* */
                 CustomTextField(
+                  controller: historicoController,
                   validator: (historico) {
                     if (historico == null || historico.isEmpty) {
                       return 'Insira um historico.';
@@ -223,7 +255,6 @@ class _CxMovimentoState extends State<CxMovimento> {
 
                     return null;
                   },
-                  // controller: historicoController,
                   label: 'Histórico',
                   minLines: 2,
                   maxLines: 2,
@@ -237,6 +268,7 @@ class _CxMovimentoState extends State<CxMovimento> {
 
                 //** Centro Custos ********************************************************** */
                 CustomSearchField(
+                  descricaoController: descricaoController,
                   onGetDescricao: getDescricao,
                   controller: idCentroCustosController,
                   label: 'Centro de Custos',

@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class CxMovimentoModel {
   final int id;
-  final String data;
+  final String data;  //field
   final double valor;
   final String sinal;
   final String historico;

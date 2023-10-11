@@ -5,6 +5,7 @@ class CustomSearchField extends StatefulWidget {
   final String label;
   final Function onBuscar;
   final TextEditingController? controller;
+  final TextEditingController? descricaoController;
   final String? Function(String?)? onSaved;
   final FocusNode? focusNode;
   final Future<dynamic> Function(String) onGetDescricao;
@@ -15,6 +16,7 @@ class CustomSearchField extends StatefulWidget {
     required this.onBuscar,
     required this.onGetDescricao,
     this.controller,
+    this.descricaoController,
     this.onSaved,
     this.focusNode,
   });
@@ -25,7 +27,7 @@ class CustomSearchField extends StatefulWidget {
 
 class _CustomSearchFieldState extends State<CustomSearchField> {
   FocusNode focusNode = FocusNode();
-  TextEditingController descricaoController = TextEditingController();
+  // TextEditingController descricaoController = TextEditingController();
 
   @override
   void initState() {
@@ -37,11 +39,16 @@ class _CustomSearchFieldState extends State<CustomSearchField> {
           if (value == null) {
             widget.controller!.text = '';
             setState(() {
-              descricaoController.text = '';
+              if (widget.descricaoController != null) {
+                widget.descricaoController!.text = '';
+              }
             });
           } else {
             setState(() {
-              descricaoController.text = value['descricao'].toString();
+              if (widget.descricaoController != null) {
+                widget.descricaoController!.text =
+                    value['descricao'].toString();
+              }
             });
           }
         });
@@ -60,6 +67,9 @@ class _CustomSearchFieldState extends State<CustomSearchField> {
   void _getDescricao(int id, String descri) {
     setState(() {
       widget.controller!.text = id.toString();
+      if (widget.descricaoController != null) {
+        widget.descricaoController!.text = descri;
+      }
     });
   }
 
@@ -101,7 +111,7 @@ class _CustomSearchFieldState extends State<CustomSearchField> {
               Expanded(
                 child: CustomTextField(
                   label: '',
-                  controller: descricaoController,
+                  controller: widget.descricaoController,
                   readOnly: true,
                   // larguraInput: 300,
                   validator: (value) {
@@ -111,7 +121,7 @@ class _CustomSearchFieldState extends State<CustomSearchField> {
                     if (widget.controller!.text.isEmpty) {
                       return 'Insira uma informação válida.';
                     }
-                
+
                     return null;
                   },
                 ),

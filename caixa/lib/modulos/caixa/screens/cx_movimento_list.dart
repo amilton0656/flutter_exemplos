@@ -1,4 +1,6 @@
 import 'package:caixa/modulos/caixa/models/cx_movimento_model.dart';
+import 'package:caixa/modulos/caixa/screens/cx_movimento.dart';
+import 'package:caixa/utils/formatadores.dart';
 import 'package:flutter/material.dart';
 
 class CxMovimentoList extends StatefulWidget {
@@ -10,7 +12,6 @@ class CxMovimentoList extends StatefulWidget {
 }
 
 class _CxMovimentoListState extends State<CxMovimentoList> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,9 +22,20 @@ class _CxMovimentoListState extends State<CxMovimentoList> {
         padding: EdgeInsets.all(10),
         child: ListView.builder(
           itemCount: widget.cxMovimento.length,
-          itemBuilder: (ctx, index) => ListTile(
-            leading: Text(widget.cxMovimento[index].data),
-            title: Text('${widget.cxMovimento[index].valor}${widget.cxMovimento[index].sinal}'),
+          itemBuilder: (ctx, index) => GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (ctx) => CxMovimento(
+                        cxLancamento: widget.cxMovimento[index],
+                      )));
+            },
+            child: ListTile(
+              leading: Text(
+                  widget.cxMovimento[index].data),
+              title: Text(
+                  '${Formatadores.numberToFormatted(widget.cxMovimento[index].valor)}${widget.cxMovimento[index].sinal}'),
+              subtitle: Text(widget.cxMovimento[index].historico),
+            ),
           ),
         ),
       ),

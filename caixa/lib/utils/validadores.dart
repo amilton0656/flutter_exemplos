@@ -42,6 +42,24 @@ class Validadores {
     return '${date.substring(0, 2)}-${date.substring(3, 5)}-${date.substring(6, 10)}';
   }
 
+  static DateTime dateFieldToDate(String date) {
+    return DateTime.parse(
+        '${date.substring(6, 10)}-${date.substring(3, 5)}-${date.substring(0, 2)}');
+  }
+
+  static String dateDateToField(DateTime date) {
+    final datax = date.toString();
+    return '${datax.substring(8, 10)}/${datax.substring(5, 7)}/${datax.substring(0, 4)}';
+  }
+
+  static String dateBancoToField(String date) {
+    return '${date.substring(8, 10)}/${date.substring(5, 7)}/${date.substring(0, 4)}';
+  }
+
+  static String dateFieldToBanco(String date) {
+    return '${date.substring(6, 10)}-${date.substring(3, 5)}-${date.substring(0, 2)}';
+  }
+
   static double StringToDouble(String value) {
     String valor = value.replaceAll('.', '').replaceAll(',', '.');
     return double.tryParse(valor) ?? 0;

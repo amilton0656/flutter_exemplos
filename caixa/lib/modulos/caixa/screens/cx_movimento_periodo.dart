@@ -2,6 +2,7 @@ import 'package:caixa/modulos/caixa/models/cx_movimento_model.dart';
 import 'package:caixa/modulos/caixa/providers/cx_centro_custos_provider.dart';
 import 'package:caixa/modulos/caixa/providers/cx_movimento_provider.dart';
 import 'package:caixa/modulos/caixa/screens/cx_centro_custos_list.dart';
+import 'package:caixa/modulos/caixa/screens/cx_movimento.dart';
 import 'package:caixa/modulos/caixa/screens/cx_movimento_list.dart';
 import 'package:caixa/widgets/custom_date_field.dart';
 import 'package:caixa/widgets/custom_search_field.dart';
@@ -9,25 +10,25 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:caixa/utils/validadores.dart';
 
-class CxMovimentoFiltro extends StatefulWidget {
-  final Future<dynamic> Function(String) onGetDescricao;
-  const CxMovimentoFiltro({super.key, required this.onGetDescricao});
+class CxMovimentoPeriodo extends StatefulWidget {
+  const CxMovimentoPeriodo({super.key});
 
   @override
-  State<CxMovimentoFiltro> createState() => _CxMovimentoFiltroState();
+  State<CxMovimentoPeriodo> createState() => _CxMovimentoPeriodoState();
 }
 
-class _CxMovimentoFiltroState extends State<CxMovimentoFiltro> {
+class _CxMovimentoPeriodoState extends State<CxMovimentoPeriodo> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController dataInicialController = TextEditingController();
   TextEditingController dataFinalController = TextEditingController();
   TextEditingController idController = TextEditingController();
+  TextEditingController descricaoController = TextEditingController();
 
   List<CxMovimentoModel> cxMovimento = [];
   bool isLoading = false;
 
-  Future<String> getDescricao(String id) async {
-    String descricao = '';
+  Future<dynamic> getDescricao(String id) async {
+    dynamic descricao = '';
     descricao =
         await Provider.of<CxCentroCustosProvider>(context, listen: false)
             .getDescricao(id);
@@ -121,7 +122,8 @@ class _CxMovimentoFiltroState extends State<CxMovimentoFiltro> {
 
               //** Centro Custos ********************************************************** */
               CustomSearchField(
-                onGetDescricao: widget.onGetDescricao,
+                descricaoController: descricaoController,
+                onGetDescricao: getDescricao,
                 controller: idController,
                 label: 'Centro de Custos',
                 onBuscar: buscarRegistros,
@@ -136,6 +138,21 @@ class _CxMovimentoFiltroState extends State<CxMovimentoFiltro> {
                 child: ElevatedButton(
                   onPressed: onSubmit,
                   child: const Text('Buscar'),
+                ),
+              ),
+
+              /** botao adicionar lançamento ******************************************************* */
+              const SizedBox(
+                height: 20,
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (ctx) => CxMovimento()));
+                  },
+                  child: const Text('Novo movimento'),
                 ),
               ),
             ],

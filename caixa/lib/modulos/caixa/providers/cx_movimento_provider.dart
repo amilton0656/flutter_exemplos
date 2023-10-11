@@ -68,7 +68,7 @@ class CxMovimentoProvider with ChangeNotifier {
         cxMovimento.add(
           CxMovimentoModel(
             id: itemdados['id'] as int,
-            data: itemdados['data'] as String,
+            data: itemdados['data'] == null ? '11/11/1111' : Validadores.dateBancoToField(itemdados['data'].toString()),
             sinal: itemdados['sinal'] as String,
             valor: itemdados['valor'] as double,
             historico: itemdados['historico'] as String,
@@ -76,6 +76,7 @@ class CxMovimentoProvider with ChangeNotifier {
           ),
         );
       });
+      notifyListeners();
       return cxMovimento;
       // cxMovimento.sort((a, b) {
       //   return a.descricao.compareTo(b.descricao);
@@ -85,7 +86,6 @@ class CxMovimentoProvider with ChangeNotifier {
       return [];
     }
 
-    notifyListeners();
     // return cxMovimento;
   }
 
@@ -98,9 +98,9 @@ class CxMovimentoProvider with ChangeNotifier {
 
     final CxMovimentoModel cxLancamento = CxMovimentoModel(
       id: hasId ? registro['id'] as int : Random().nextInt(5000),
-      data: registro['data'] as String,
-      sinal: registro['sinal'] as String,
+      data: Validadores.dateBancoToField(registro['data'].toString()),
       valor: Validadores.StringToDouble(registro['valor'].toString()),
+      sinal: registro['sinal'] as String,
       historico: registro['historico'] as String,
       id_centrocustos:
           Validadores.StringToInt(registro['id_centrocustos'].toString()),
@@ -117,7 +117,7 @@ class CxMovimentoProvider with ChangeNotifier {
     final url = Uri.parse('$_baseUrl/cxmovimento');
 
     final envio = {
-      "data": Validadores.dateStringToBanco(lancamento.data.toString()),
+      "data": Validadores.dateFieldToBanco(lancamento.data),
       "sinal": lancamento.sinal,
       "valor": lancamento.valor.toString(),
       "historico": lancamento.historico,
@@ -163,11 +163,11 @@ class CxMovimentoProvider with ChangeNotifier {
         final url = Uri.parse('$_baseUrl/cxmovimento');
         final response = await http.patch(url, body: {
           "id": lancamento.id.toString(),
-          "data": Validadores.dateStringToBanco(lancamento.data.toString()),
+          "data": Validadores.dateFieldToBanco(lancamento.data),
           "sinal": lancamento.sinal,
-          "valor": lancamento.valor,
+          "valor": lancamento.valor.toString(),
           "historico": lancamento.historico,
-          "id_centrocustos": lancamento.id_centrocustos,
+          "id_centrocustos": lancamento.id_centrocustos.toString(),
         });
 
         if (response.statusCode == 200) {
