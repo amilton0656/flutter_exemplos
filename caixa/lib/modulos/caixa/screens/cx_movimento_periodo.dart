@@ -36,16 +36,17 @@ class _CxMovimentoPeriodoState extends State<CxMovimentoPeriodo> {
   }
 
   onSubmit() async {
-    print(Validadores.dateIsAfter(
-        dataInicialController.text, dataFinalController.text));
-
     if (_formKey.currentState!.validate()) {
       _formKey.currentState?.save();
       // print(_formData);
       setState(() => isLoading = true);
       final response =
           await Provider.of<CxMovimentoProvider>(context, listen: false)
-              .loadRegistros();
+              .loadPeriodo(
+                Validadores.dateDisplayToBanco(dataInicialController.text),
+                Validadores.dateDisplayToBanco(dataFinalController.text),
+                idController.text
+              );
 
       setState(() {
         cxMovimento = response;
@@ -55,7 +56,7 @@ class _CxMovimentoPeriodoState extends State<CxMovimentoPeriodo> {
 
       setState(() => isLoading = false);
       Navigator.of(context).push(MaterialPageRoute(
-          builder: (ctx) => CxMovimentoList(cxMovimento: cxMovimento)));
+          builder: (ctx) => CxMovimentoList()));
     }
   }
 

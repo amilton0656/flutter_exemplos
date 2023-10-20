@@ -25,40 +25,11 @@ class Validadores {
   }
 
   static bool dateIsAfter(String data1, String data2) {
-    DateTime dt1 = DateTime.parse(inverteDate(data1));
-    DateTime dt2 = DateTime.parse(inverteDate(data2));
+    DateTime dt1 = DateTime.parse(dateDisplayToBanco(data1));
+    DateTime dt2 = DateTime.parse(dateDisplayToBanco(data2));
     return (dt1.compareTo(dt2) <= 0);
   }
 
-  static String inverteDate(String date) {
-    return '${date.substring(6, 10)}-${date.substring(3, 5)}-${date.substring(0, 2)}';
-  }
-
-  static String dateStringToBanco(String date) {
-    return '${date.substring(6, 10)}-${date.substring(3, 5)}-${date.substring(0, 2)}';
-  }
-
-  static String dateBancoToString(String date) {
-    return '${date.substring(0, 2)}-${date.substring(3, 5)}-${date.substring(6, 10)}';
-  }
-
-  static DateTime dateFieldToDate(String date) {
-    return DateTime.parse(
-        '${date.substring(6, 10)}-${date.substring(3, 5)}-${date.substring(0, 2)}');
-  }
-
-  static String dateDateToField(DateTime date) {
-    final datax = date.toString();
-    return '${datax.substring(8, 10)}/${datax.substring(5, 7)}/${datax.substring(0, 4)}';
-  }
-
-  static String dateBancoToField(String date) {
-    return '${date.substring(8, 10)}/${date.substring(5, 7)}/${date.substring(0, 4)}';
-  }
-
-  static String dateFieldToBanco(String date) {
-    return '${date.substring(6, 10)}-${date.substring(3, 5)}-${date.substring(0, 2)}';
-  }
 
   static double StringToDouble(String value) {
     String valor = value.replaceAll('.', '').replaceAll(',', '.');
@@ -68,5 +39,14 @@ class Validadores {
   static int StringToInt(String value) {
     String valor = value.replaceAll('.', '');
     return int.tryParse(valor) ?? 0;
+  }
+
+
+  static String dateDisplayToBanco(String date) {
+    return '${date.substring(6, 10)}-${date.substring(3, 5)}-${date.substring(0, 2)}';
+  }
+
+  static String dateBancoToDisplay(String date) {
+    return '${date.substring(8, 10)}/${date.substring(5, 7)}/${date.substring(0, 4)}';
   }
 }

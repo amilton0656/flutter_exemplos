@@ -64,11 +64,58 @@ class CxMovimentoProvider with ChangeNotifier {
       dados.forEach((itemdados) {
         print(itemdados['id']);
         print(itemdados['data']);
-        
+
         cxMovimento.add(
           CxMovimentoModel(
             id: itemdados['id'] as int,
-            data: itemdados['data'] == null ? '11/11/1111' : Validadores.dateBancoToField(itemdados['data'].toString()),
+            data: itemdados['data'] == null
+                ? ''
+                : Validadores.dateBancoToDisplay(itemdados['data'].toString()),
+            sinal: itemdados['sinal'] as String,
+            valor: itemdados['valor'] as double,
+            historico: itemdados['historico'] as String,
+            id_centrocustos: itemdados['id_centrocustos'] as int,
+          ),
+        );
+      });
+      notifyListeners();
+      return cxMovimento;
+      // cxMovimento.sort((a, b) {
+      //   return a.descricao.compareTo(b.descricao);
+      // });
+    } catch (err) {
+      print('');
+      return [];
+    }
+
+    // return cxMovimento;
+  }
+
+  Future<List<CxMovimentoModel>> loadPeriodo(
+      String dataInicio, String dataFim, String centrocustos) async {
+    cxMovimento = [];
+    final url = Uri.parse('$_baseUrl/cxmovimento/query');
+    final query = {
+      "query":
+          "select * from cx_movimento where data between '$dataInicio' and '$dataFim' and id_centrocustos = $centrocustos",
+    };
+    print(query);
+
+    try {
+      final response = await http.post(url, body: query);
+
+      final dados = jsonDecode(response.body);
+
+      dados.forEach((itemdados) {
+        print(itemdados['id']);
+        print(itemdados['data']);
+
+        cxMovimento.add(
+          CxMovimentoModel(
+            id: itemdados['id'] as int,
+            data: itemdados['data'] == null
+                ? ''
+                : Validadores.dateBancoToDisplay(itemdados['data'].toString()),
             sinal: itemdados['sinal'] as String,
             valor: itemdados['valor'] as double,
             historico: itemdados['historico'] as String,
@@ -98,7 +145,7 @@ class CxMovimentoProvider with ChangeNotifier {
 
     final CxMovimentoModel cxLancamento = CxMovimentoModel(
       id: hasId ? registro['id'] as int : Random().nextInt(5000),
-      data: Validadores.dateBancoToField(registro['data'].toString()),
+      data: Validadores.dateDisplayToBanco(registro['data'].toString()),
       valor: Validadores.StringToDouble(registro['valor'].toString()),
       sinal: registro['sinal'] as String,
       historico: registro['historico'] as String,
@@ -117,7 +164,7 @@ class CxMovimentoProvider with ChangeNotifier {
     final url = Uri.parse('$_baseUrl/cxmovimento');
 
     final envio = {
-      "data": Validadores.dateFieldToBanco(lancamento.data),
+      "data": lancamento.data,
       "sinal": lancamento.sinal,
       "valor": lancamento.valor.toString(),
       "historico": lancamento.historico,
@@ -143,6 +190,7 @@ class CxMovimentoProvider with ChangeNotifier {
           historico: lancamento.historico,
           id_centrocustos: lancamento.id_centrocustos,
         );
+        registro.setData = Validadores.dateBancoToDisplay(lancamento.data);
         cxMovimento.add(registro);
         notifyListeners();
         return true;
@@ -163,7 +211,7 @@ class CxMovimentoProvider with ChangeNotifier {
         final url = Uri.parse('$_baseUrl/cxmovimento');
         final response = await http.patch(url, body: {
           "id": lancamento.id.toString(),
-          "data": Validadores.dateFieldToBanco(lancamento.data),
+          "data": lancamento.data,
           "sinal": lancamento.sinal,
           "valor": lancamento.valor.toString(),
           "historico": lancamento.historico,
@@ -171,6 +219,8 @@ class CxMovimentoProvider with ChangeNotifier {
         });
 
         if (response.statusCode == 200) {
+          final dt = lancamento.data;
+          lancamento.setData = Validadores.dateBancoToDisplay(lancamento.data);
           cxMovimento[index] = lancamento;
           notifyListeners();
           return true;

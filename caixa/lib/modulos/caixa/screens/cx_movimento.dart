@@ -79,17 +79,15 @@ class _CxMovimentoState extends State<CxMovimento> {
     if (_formKey.currentState?.validate() != null) {
       _formKey.currentState?.save();
       _formData['sinal'] = sinalSeletor ? '+' : '-';
-      print(_formData);
       setState(() => isLoading = true);
       final response =
           await Provider.of<CxMovimentoProvider>(context, listen: false)
               .saveRegistro(_formData);
       setState(() => isLoading = false);
-      print(response);
-      // if (response) {
-      //   if (!context.mounted) return;
-      //   Navigator.of(context).pop();
-      // }
+      if (response) {
+        if (!context.mounted) return;
+        Navigator.of(context).pop();
+      }
     }
   }
 
